@@ -110,8 +110,8 @@ const MyTradeInfoView = () => {
         setTrades([])
         setLoading(false)
         toast.warning('Please select a proper date, future dates are not allowed.', { autoClose: 3000 })
-        
-return
+
+        return
       }
 
       let url = `/trade?date=${dateStr}&page=${page}&page_size=${pageSize}`
@@ -140,7 +140,7 @@ return
     } catch (err) {
       // setError(err.message)
       console.error('Error fetching trades:', err)
-      toast.error(err.response?.data?.message || 'Failed to fetch trades', { autoClose: 3000 });
+      toast.error(err.response?.data?.message || 'Failed to fetch trades', { autoClose: 3000 })
     } finally {
       setLoading(false)
     }
@@ -163,23 +163,25 @@ return
   }
 
   const getProfitValue = profitStr => {
-    if (!profitStr) return 0
-    
-return parseFloat(profitStr.replace('+', '').replace('-', ''))
+    if (profitStr == null) return 0
+
+    const str = String(profitStr)
+
+    return parseFloat(str.replace('+', '').replace('-', ''))
   }
 
   const isProfit = profitStr => {
-    if (!profitStr) return false
-    
-return profitStr.includes('+')
+    if (typeof profitStr === 'number') return profitStr >= 0
+    if (typeof profitStr === 'string') return profitStr.includes('+')
+
+    return false
   }
 
   const calculateTotalPL = () => {
     return trades.reduce((acc, trade) => {
       const profitValue = getProfitValue(trade.profit)
 
-      
-return acc + (isProfit(trade.profit) ? profitValue : -profitValue)
+      return acc + (isProfit(trade.profit) ? profitValue : -profitValue)
     }, 0)
   }
 
@@ -224,15 +226,15 @@ return acc + (isProfit(trade.profit) ? profitValue : -profitValue)
           <TableCell>{formatDateTime(trade.created_at)}</TableCell>
           <TableCell>{trade.token_symbol}</TableCell>
           <TableCell align='center'>-</TableCell>
-          <TableCell align='center'>{trade.open_price}</TableCell>
-          <TableCell align='center'>{trade.close_price || '-'}</TableCell>
+          <TableCell align='center'> {trade.open_price ? Number(trade.open_price).toFixed(15) : '-'}</TableCell>
+          <TableCell align='center'>{trade.close_price ? Number(trade.close_price).toFixed(15) : '-'}</TableCell>
           <TableCell align='center'>
             {trade.profit ? (
               <ProfitChip
-                label={trade.profit}
-                profit={isProfitable ? 1 : -1}
+                label={(isProfit(trade.profit) ? '+' : '-') + getProfitValue(trade.profit).toFixed(15)}
+                profit={isProfit(trade.profit) ? 1 : -1}
                 size='small'
-                icon={isProfitable ? <ArrowUpward fontSize='small' /> : <ArrowDownward fontSize='small' />}
+                icon={isProfit(trade.profit) ? <ArrowUpward fontSize='small' /> : <ArrowDownward fontSize='small' />}
               />
             ) : (
               '-'
