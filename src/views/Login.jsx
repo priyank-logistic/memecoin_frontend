@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useState,useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
 // Next Imports
 import Link from 'next/link'
@@ -45,7 +45,6 @@ const LoginIllustration = styled('img')(({ theme }) => ({
   [theme.breakpoints.down('lg')]: { maxBlockSize: 450 }
 }))
 
-
 // Validation Schema
 const schema = object({
   email: pipe(string(), minLength(1, 'This field is required'), email('Email is invalid')),
@@ -55,6 +54,7 @@ const schema = object({
 const Login = ({ mode }) => {
   const [isPasswordShown, setIsPasswordShown] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isClient, setIsClient] = useState(false)
 
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -62,16 +62,24 @@ const Login = ({ mode }) => {
   const { settings } = useSettings()
   const theme = useTheme()
 
+  // Set isClient to true when component mounts
   useEffect(() => {
-    const accessToken = localStorage.getItem('accessToken')
-    const refreshToken = localStorage.getItem('refreshToken')
-  
-    if (accessToken && refreshToken) {
-      const redirectTo = getLocalizedUrl(searchParams.get('redirectTo') || '/apps/live-token-overview', locale)
+    setIsClient(true)
+  }, [])
 
-      router.push(redirectTo)
+  // Check for tokens and redirect if logged in
+  useEffect(() => {
+    if (isClient) {
+      const accessToken = localStorage.getItem('accessToken')
+      const refreshToken = localStorage.getItem('refreshToken')
+    
+      if (accessToken && refreshToken) {
+        const redirectTo = getLocalizedUrl(searchParams.get('redirectTo') || '/apps/live-token-overview', locale)
+
+        router.push(redirectTo)
+      }
     }
-  }, [router, locale, searchParams])
+  }, [isClient, router, locale, searchParams])
 
   const {
     control,
@@ -81,7 +89,6 @@ const Login = ({ mode }) => {
     resolver: valibotResolver(schema),
     defaultValues: { email: '', password: '' }
   })
-
 
   const characterIllustration = useImageVariant(
     mode,
@@ -93,38 +100,40 @@ const Login = ({ mode }) => {
 
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
 
-  // In your login onSubmit function
-const onSubmit = async data => {
-  setIsLoading(true)
+  const onSubmit = async data => {
+    setIsLoading(true)
 
-  try {
-    const response = await fetch('https://api.dev.alhpaorbit.com/api/user/login/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: data.email, password: data.password })
-    })
+    try {
+      const response = await fetch('https://api.dev.alhpaorbit.com/api/user/login/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: data.email, password: data.password })
+      })
 
-    const result = await response.json()
+      const result = await response.json()
 
-    if (response.ok) {
-      localStorage.setItem('accessToken', result.access)
-      localStorage.setItem('refreshToken', result.refresh)
-      
-      // Force a full page reload to reset application state
-      window.location.href = getLocalizedUrl(
-        searchParams.get('redirectTo') || '/en/apps/live-token-overview', 
-        locale
-      )
-      toast.success('Login successful!')
-    } else {
-      throw new Error(result.detail || 'Invalid credentials')
+      if (response.ok) {
+        if (isClient) {
+          localStorage.setItem('accessToken', result.access)
+          localStorage.setItem('refreshToken', result.refresh)
+          
+          // Use router.push instead of window.location for better Next.js integration
+          router.push(getLocalizedUrl(
+            searchParams.get('redirectTo') || '/en/apps/live-token-overview', 
+            locale
+          ))
+        }
+
+        toast.success('Login successful!')
+      } else {
+        throw new Error(result.detail || 'Invalid credentials')
+      }
+    } catch (error) {
+      toast.error(error.message || 'Login failed. Please try again.')
+    } finally {
+      setIsLoading(false)
     }
-  } catch (error) {
-    toast.error(error.message || 'Login failed. Please try again.')
-  } finally {
-    setIsLoading(false)
   }
-}
 
   return (
     <div className='flex bs-full justify-center'>
