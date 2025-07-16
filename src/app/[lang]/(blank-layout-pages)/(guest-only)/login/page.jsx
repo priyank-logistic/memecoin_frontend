@@ -1,8 +1,11 @@
-// Component Imports
-import Login from '@views/Login'
+// Dynamic Import
+import dynamic from 'next/dynamic'
 
 // Server Action Imports
 import { getServerMode } from '@core/utils/serverHelpers'
+
+// Dynamically load the client component (disable SSR)
+const Login = dynamic(() => import('@views/Login'), { ssr: false })
 
 export const metadata = {
   title: 'Login',
