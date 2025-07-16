@@ -48,7 +48,8 @@ const UserDropdown = () => {
 
   // Hooks
   const router = useRouter()
-  const { data: session } = useSession()
+
+  // const { data: session } = useSession()
   const { settings } = useSettings()
   const { lang: locale } = useParams()
 
@@ -105,8 +106,8 @@ const UserDropdown = () => {
       >
         <Avatar
           ref={anchorRef} 
-          alt={session?.user?.name || 'Admin'}
-          src={session?.user?.image || ''}
+          alt={'Admin'}
+          src={''}
           onClick={handleDropdownOpen}
           className='cursor-pointer bs-[38px] is-[38px]'
         />
@@ -130,12 +131,12 @@ const UserDropdown = () => {
               <ClickAwayListener onClickAway={e => handleDropdownClose(e)}>
                 <MenuList>
                   <div className='flex items-center plb-2 pli-6 gap-2' tabIndex={-1}>
-                    <Avatar alt={session?.user?.name || 'Admin'} src={session?.user?.image || ''} />
+                    <Avatar alt={'Admin'} src={''} />
                     <div className='flex items-start flex-col'>
                       <Typography className='font-medium' color='text.primary'>
-                        {session?.user?.name || 'Admin'}
+                        {'Admin'}
                       </Typography>
-                      <Typography variant='caption'>{session?.user?.email || 'admin@gmail.com'}</Typography>
+                      <Typography variant='caption'>{'admin@gmail.com'}</Typography>
                     </div>
                   </div>
                   <Divider className='mlb-1' />

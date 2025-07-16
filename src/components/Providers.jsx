@@ -20,7 +20,8 @@ const Providers = async props => {
   const systemMode = await getSystemMode()
 
   return (
-    <NextAuthProvider basePath={process.env.NEXTAUTH_BASEPATH}>
+
+    // <NextAuthProvider basePath={process.env.NEXTAUTH_BASEPATH}>
       <VerticalNavProvider>
         <SettingsProvider settingsCookie={settingsCookie} mode={mode}>
           <ThemeProvider direction={direction} systemMode={systemMode}>
@@ -29,7 +30,8 @@ const Providers = async props => {
           </ThemeProvider>
         </SettingsProvider>
       </VerticalNavProvider>
-    </NextAuthProvider>
+
+    // </NextAuthProvider>
   )
 }
 
