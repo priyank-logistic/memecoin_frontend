@@ -13,7 +13,8 @@ import Navbar from '@components/layout/vertical/Navbar'
 // import VerticalFooter from '@components/layout/vertical/Footer'
 import Customizer from '@core/components/customizer'
 import ScrollToTop from '@core/components/scroll-to-top'
-import AuthGuard from '@/hocs/AuthGuard'
+
+// import AuthGuard from '@/hocs/AuthGuard'
 
 // Config Imports
 import { i18n } from '@configs/i18n'
