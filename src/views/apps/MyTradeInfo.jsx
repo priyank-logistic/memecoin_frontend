@@ -225,7 +225,7 @@ const MyTradeInfoView = () => {
         <StyledTableRow key={trade.created_at + trade.token_symbol}>
           <TableCell>{formatDateTime(trade.created_at)}</TableCell>
           <TableCell>{trade.token_symbol}</TableCell>
-          <TableCell align='center'>-</TableCell>
+          <TableCell>{trade.token_amount}</TableCell>
           <TableCell align='center'> {trade.open_price ? Number(trade.open_price).toFixed(15) : '-'}</TableCell>
           <TableCell align='center'>{trade.close_price ? Number(trade.close_price).toFixed(15) : '-'}</TableCell>
           <TableCell align='center'>
@@ -388,12 +388,12 @@ const MyTradeInfoView = () => {
                   color={calculateTotalPL() >= 0 ? 'success.main' : 'error.main'}
                   fontWeight={600}
                 >
-                  $
                   {calculateTotalPL().toLocaleString('fullwide', {
                     useGrouping: false,
                     maximumFractionDigits: 100
                   })}
                 </Typography>
+               {' '} SOL
               </Typography>
             </Box>
 

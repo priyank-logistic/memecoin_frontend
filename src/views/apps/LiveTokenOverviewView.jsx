@@ -972,10 +972,10 @@ const LiveTokenOverview = () => {
                       {new Date(trade.created_at).toLocaleString()}
                     </td>
                     <td className='p-3 text-sm text-center' style={{ color: 'var(--mui-palette-text-primary)' }}>
-                      ${parseFloat(trade.open_price).toFixed(20)}
+                      {parseFloat(trade.open_price).toFixed(20)}
                     </td>
                     <td className='p-3 text-sm text-center' style={{ color: 'var(--mui-palette-text-primary)' }}>
-                      {parseFloat(trade.token_amount).toFixed(8)}
+                      {parseFloat(trade.total_sol).toFixed(20)}
                     </td>
                     <td className='p-3 text-sm text-center'>
                       <button
@@ -1236,10 +1236,10 @@ const LiveTokenOverview = () => {
                       {new Date(trade.created_at).toLocaleString()}
                     </td>
                     <td className='p-3 text-sm text-center' style={{ color: 'var(--mui-palette-text-primary)' }}>
-                      ${parseFloat(trade.open_price).toFixed(20)}
+                      {parseFloat(trade.open_price).toFixed(20)}
                     </td>
                     <td className='p-3 text-sm text-center' style={{ color: 'var(--mui-palette-text-primary)' }}>
-                      ${parseFloat(trade.close_price).toFixed(20)}
+                      {parseFloat(trade.close_price).toFixed(20)}
                     </td>
                     <td
                       className='p-3 text-sm text-center'
@@ -1250,7 +1250,7 @@ const LiveTokenOverview = () => {
                             : 'var(--mui-palette-success-main)'
                       }}
                     >
-                      ${parseFloat(trade.profit).toFixed(20)}
+                      {parseFloat(trade.profit).toFixed(20)}
                     </td>
                   </tr>
                 ))
