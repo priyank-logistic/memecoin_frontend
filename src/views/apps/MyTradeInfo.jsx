@@ -165,9 +165,9 @@ const MyTradeInfoView = () => {
   const getProfitValue = profitStr => {
     if (profitStr == null) return 0
 
-    const str = String(profitStr)
+    const num = parseFloat(profitStr)
 
-    return parseFloat(str.replace('+', '').replace('-', ''))
+    return num
   }
 
   const isProfit = profitStr => {
@@ -218,8 +218,6 @@ const MyTradeInfoView = () => {
     }
 
     return trades.map(trade => {
-      const profitValue = getProfitValue(trade.profit)
-      const isProfitable = isProfit(trade.profit)
 
       return (
         <StyledTableRow key={trade.created_at + trade.token_symbol}>
@@ -231,7 +229,7 @@ const MyTradeInfoView = () => {
           <TableCell align='center'>
             {trade.profit ? (
               <ProfitChip
-                label={(isProfit(trade.profit) ? '+' : '-') + getProfitValue(trade.profit).toFixed(15)}
+                label={(isProfit(trade.profit) ? '+' : '-') + Math.abs(getProfitValue(trade.profit)).toFixed(15)}
                 profit={isProfit(trade.profit) ? 1 : -1}
                 size='small'
                 icon={isProfit(trade.profit) ? <ArrowUpward fontSize='small' /> : <ArrowDownward fontSize='small' />}
@@ -392,8 +390,8 @@ const MyTradeInfoView = () => {
                     useGrouping: false,
                     maximumFractionDigits: 100
                   })}
-                </Typography>
-               {' '} SOL
+                </Typography>{' '}
+                SOL
               </Typography>
             </Box>
 
