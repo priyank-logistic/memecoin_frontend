@@ -27,7 +27,6 @@ const AllTokenList = () => {
   const [ws, setWs] = useState(null)
   const [isConnected, setIsConnected] = useState(false)
 
-
   const [defaultTradeSettings, setDefaultTradeSettings] = useState({
     sl: 10,
     tp: 20,
@@ -43,7 +42,7 @@ const AllTokenList = () => {
   })
 
   const [isLoadingSettings, setIsLoadingSettings] = useState(false)
-  
+
   useEffect(() => {
     const fetchDefaultSettings = async () => {
       try {
@@ -53,7 +52,7 @@ const AllTokenList = () => {
         setDefaultTradeSettings(response.data)
       } catch (error) {
         console.error('Error fetching default settings:', error)
-        toast.error(error.response?.data?.message || 'Failed to fetch bot-control data', { autoClose: 3000 });
+        toast.error(error.response?.data?.message || 'Failed to fetch bot-control data', { autoClose: 3000 })
       } finally {
         setIsLoadingSettings(false)
       }
@@ -80,19 +79,18 @@ const AllTokenList = () => {
 
   useEffect(() => {
     const socket = new WebSocket('wss://api.dev.alhpaorbit.com/ws/token/')
-    
-    
+
     socket.onopen = () => {
       console.log('WebSocket connected')
       setWs(socket)
       setIsConnected(true)
     }
 
-    socket.onmessage = (event) => {
+    socket.onmessage = event => {
       const data = JSON.parse(event.data)
 
       console.log('New token received:', data)
-      
+
       setTokens(prevTokens => {
         const newToken = {
           id: data.id,
@@ -102,28 +100,27 @@ const AllTokenList = () => {
           price: '$0.00',
           image: data.logo || 'https://cdn.pixabay.com/photo/2017/01/25/12/31/bitcoin-2007769_1280.jpg',
           is_approved: true,
+          tweet_id: data.tweet_source
 
-          // tweet_id: '',
           // wallet_count: '0',
           // amount_per_wallet: '0',
           // tradeSettings: { ...defaultTradeSettings }
         }
-        
+
         const exists = prevTokens.some(token => token.id === data.id)
 
         if (!exists) {
           return [newToken, ...prevTokens]
         }
 
-        
-return prevTokens
+        return prevTokens
       })
-      
+
       setTotalTokens(prev => prev + 1)
       toast.success(`New token added: ${data.name} (${data.symbol})`)
     }
 
-    socket.onerror = (error) => {
+    socket.onerror = error => {
       console.error('WebSocket error:', error)
     }
 
@@ -175,7 +172,7 @@ return prevTokens
           price: token.profit ? `$${token.profit}` : '$0.00',
           image: token.logo || 'https://cdn.pixabay.com/photo/2017/01/25/12/31/bitcoin-2007769_1280.jpg',
           is_approved: token.is_approved,
-          tweet_id: token.x,
+          tweet_id: token.tweet_source,
           tradeSettings: {
             ...defaultTradeSettings,
             walletCount: token.wallet_count?.toString() || '0',
@@ -187,7 +184,7 @@ return prevTokens
         setTotalPages(response.data.total_pages)
       } catch (error) {
         console.error('Error fetching tokens:', error)
-        toast.error(error.response?.data?.message || 'Failed to fetch token data', { autoClose: 3000 });
+        toast.error(error.response?.data?.message || 'Failed to fetch token data', { autoClose: 3000 })
 
         if (error.response?.status === 401) {
           router.push('/login')
@@ -234,39 +231,37 @@ return prevTokens
 
   const handleApproveToken = async () => {
     try {
-      const response = await axiosInstance.patch(
-        `/token/approve-token/${selectedTokenId}`,
-        {
-          is_approved: true,
-          wallet_count: approvalValues.wallet_count,
-          amount_per_wallet: approvalValues.amount_per_wallet
-        }
-      );
-  
-      setTokens(tokens.map(token => {
-        if (token.id === selectedTokenId) {
-          return {
-            ...token,
-            is_approved: true,
-            wallet_count: approvalValues.wallet_count,
-            amount_per_wallet: approvalValues.amount_per_wallet
-          };
-        }
+      const response = await axiosInstance.patch(`/token/approve-token/${selectedTokenId}`, {
+        is_approved: true,
+        wallet_count: approvalValues.wallet_count,
+        amount_per_wallet: approvalValues.amount_per_wallet
+      })
 
-        return token;
-      }));
+      setTokens(
+        tokens.map(token => {
+          if (token.id === selectedTokenId) {
+            return {
+              ...token,
+              is_approved: true,
+              wallet_count: approvalValues.wallet_count,
+              amount_per_wallet: approvalValues.amount_per_wallet
+            }
+          }
+
+          return token
+        })
+      )
 
       // console.log(approvalValues.wallet_count)
       // console.log(approvalValues.amount_per_wallet)
-  
-      setShowModal(false);
-      setSelectedTokenId(null);
-      
+
+      setShowModal(false)
+      setSelectedTokenId(null)
     } catch (error) {
-      console.error('Error approving token:', error);
-      toast.error(error.response?.data?.message || 'Failed to approve token');
+      console.error('Error approving token:', error)
+      toast.error(error.response?.data?.message || 'Failed to approve token')
     }
-  };
+  }
 
   const filteredTokens = useMemo(() => {
     return tokens.filter(token => `${token.name} ${token.symbol}`.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -335,7 +330,7 @@ return prevTokens
       setSelectedFile(null)
     } catch (error) {
       console.error('Error creating token:', error)
-      toast.error(error.response|| 'Error creating token', { autoClose: 3000 });
+      toast.error(error.response || 'Error creating token', { autoClose: 3000 })
     } finally {
       setIsCreating(false)
     }
@@ -355,9 +350,9 @@ return prevTokens
   }
 
   const ConnectionStatus = () => (
-    <div className="flex items-center ml-4">
+    <div className='flex items-center ml-4'>
       <div className={`w-3 h-3 rounded-full mr-2 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-      <span className="text-sm text-[var(--mui-palette-text-secondary)]">
+      <span className='text-sm text-[var(--mui-palette-text-secondary)]'>
         {isConnected ? 'Connected' : 'Connecting...'}
       </span>
     </div>
@@ -380,7 +375,7 @@ return prevTokens
           </div>
 
           <div className='flex flex-col md:flex-row items-stretch md:items-center gap-2 w-full md:w-auto'>
-          <ConnectionStatus />
+            <ConnectionStatus />
             <div className='relative'>
               <select
                 value={tokensPerPage}
@@ -498,28 +493,18 @@ return prevTokens
                       {formatDate(token.created_at)}
                     </td>
 
-                    <td className='px-6 py-4 whitespace-nowrap text-sm'>
+                    <td className='px-6 py-4 text-left text-sm'>
                       {token.tweet_id ? (
-                        <a
-                          href={`https://twitter.com/twitter/status/${token.tweet_id}`}
-                          target='_blank'
-                          rel='noopener noreferrer'
-                          className='text-primary hover:text-blue-700 flex items-center'
-                        >
-                          <svg
-                            className='h-4 w-4 mr-1'
-                            fill='currentColor'
-                            viewBox='0 0 24 24'
-                            xmlns='http://www.w3.org/2000/svg'
-                          >
-                            <path d='M23.643 4.937c-.835.37-1.732.62-2.675.733.962-.576 1.7-1.49 2.048-2.578-.9.534-1.897.922-2.958 1.13-.85-.904-2.06-1.47-3.4-1.47-2.572 0-4.658 2.086-4.658 4.66 0 .364.042.718.12 1.06-3.873-.195-7.304-2.05-9.602-4.868-.4.69-.63 1.49-.63 2.342 0 1.616.823 3.043 2.072 3.878-.764-.025-1.482-.234-2.11-.583v.06c0 2.257 1.605 4.14 3.737 4.568-.392.106-.803.162-1.227.162-.3 0-.593-.028-.877-.082.593 1.85 2.313 3.198 4.352 3.234-1.595 1.25-3.604 1.995-5.786 1.995-.376 0-.747-.022-1.112-.065 2.062 1.323 4.51 2.093 7.14 2.093 8.57 0 13.255-7.098 13.255-13.254 0-.2-.005-.402-.014-.602.91-.658 1.7-1.477 2.323-2.41z' />
-                          </svg>
-                          {shortenTweetId(token.tweet_id)}
+                        <a href={token.tweet_id} target='_blank' rel='noopener noreferrer'>
+                          <button className='text-primary hover:text-blue-700 px-3 py-1 rounded-md bg-primaryLighter hover:bg-primaryLight transition-colors cursor-pointer'>
+                            View Tweet
+                          </button>
                         </a>
                       ) : (
                         <span className='text-[var(--mui-palette-text-secondary)]'>N/A</span>
                       )}
                     </td>
+
                     <td className='px-6 py-4 text-left text-sm'>
                       <a href={`/apps/live-token-overview/${token.id}`} target='_blank' rel='noopener noreferrer'>
                         <button className='text-primary hover:text-blue-700 px-3 py-1 rounded-md bg-primaryLighter hover:bg-primaryLight transition-colors cursor-pointer'>
