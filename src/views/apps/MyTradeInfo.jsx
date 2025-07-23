@@ -179,9 +179,9 @@ const MyTradeInfoView = () => {
 
   const calculateTotalPL = () => {
     return trades.reduce((acc, trade) => {
-      const profitValue = getProfitValue(trade.profit)
+      const profitValue = Number(trade.profit) || 0
 
-      return acc + (isProfit(trade.profit) ? profitValue : -profitValue)
+      return acc + profitValue
     }, 0)
   }
 
@@ -218,7 +218,6 @@ const MyTradeInfoView = () => {
     }
 
     return trades.map(trade => {
-
       return (
         <StyledTableRow key={trade.created_at + trade.token_symbol}>
           <TableCell>{formatDateTime(trade.created_at)}</TableCell>

@@ -26,6 +26,7 @@ const AllTokenList = () => {
   const [isCreating, setIsCreating] = useState(false)
   const [ws, setWs] = useState(null)
   const [isConnected, setIsConnected] = useState(false)
+  const [sessionProfit, setSessionProfit] = useState(0)
 
   const [defaultTradeSettings, setDefaultTradeSettings] = useState({
     sl: 10,
@@ -59,6 +60,25 @@ const AllTokenList = () => {
     }
 
     fetchDefaultSettings()
+  }, [])
+
+  useEffect(() => {
+    const fetchTotalProfit = async () => {
+      try {
+        // Fetch session profit
+        const profitResponse = await axiosInstance.get('token/total-profit')
+
+        setSessionProfit(profitResponse.data.profit)
+
+      } catch (err) {
+        console.error('Error fetching data:', err)
+        toast.error(err.response?.data?.message || 'Failed to fetch Total Profit data', { autoClose: 3000 })
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchTotalProfit()
   }, [])
 
   const [newToken, setNewToken] = useState({
@@ -100,7 +120,8 @@ const AllTokenList = () => {
           price: '$0.00',
           image: data.logo || 'https://cdn.pixabay.com/photo/2017/01/25/12/31/bitcoin-2007769_1280.jpg',
           is_approved: true,
-          tweet_id: data.tweet_source
+          tweet_id: data.tweet_source,
+          profit: data.profit || 0,
 
           // wallet_count: '0',
           // amount_per_wallet: '0',
@@ -173,6 +194,7 @@ const AllTokenList = () => {
           image: token.logo || 'https://cdn.pixabay.com/photo/2017/01/25/12/31/bitcoin-2007769_1280.jpg',
           is_approved: token.is_approved,
           tweet_id: token.tweet_source,
+          profit: token.profit,
           tradeSettings: {
             ...defaultTradeSettings,
             walletCount: token.wallet_count?.toString() || '0',
@@ -368,60 +390,95 @@ const AllTokenList = () => {
           borderRadius: '20px'
         }}
       >
-        <div className='flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4'>
-          <div>
-            <h1 className='text-2xl md:text-3xl font-bold text-[var(--mui-palette-text-primary)]'>Token Explorer</h1>
-            <p className='text-[var(--mui-palette-text-secondary)] mt-1'>Discover and analyze all available tokens</p>
+        <div className='flex flex-col xl:flex-row justify-between items-start xl:items-center mb-8 gap-4'>
+          <div className='w-full xl:flex-1'>
+            <div className='flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full'>
+              <div>
+                <h1 className='text-2xl md:text-3xl font-bold text-[var(--mui-palette-text-primary)]'>
+                  Token Explorer
+                </h1>
+                <p className='text-[var(--mui-palette-text-secondary)] mt-1'>
+                  Discover and analyze all available tokens
+                </p>
+              </div>
+
+              <div className='flex flex-col sm:flex-row items-stretch gap-3 w-full md:w-auto'>
+                <div className='flex gap-3 flex-col sm:flex-row w-full sm:w-auto'>
+                  <ConnectionStatus />
+                  <div className='relative'>
+                    <select
+                      value={tokensPerPage}
+                      onChange={e => {
+                        setTokensPerPage(Number(e.target.value))
+                        setCurrentPage(1)
+                      }}
+                      className='pl-3 pr-8 py-2 rounded-lg border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-primary bg-[var(--mui-palette-background-default)] text-[var(--mui-palette-text-primary)]'
+                    >
+                      <option value='5'>5 per page</option>
+                      <option value='8'>8 per page</option>
+                      <option value='10'>10 per page</option>
+                      <option value='15'>15 per page</option>
+                      <option value='20'>20 per page</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className='relative w-full sm:w-64'>
+                  <input
+                    type='text'
+                    placeholder='Search tokens...'
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                    className='pl-10 pr-4 py-2 rounded-lg border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-primary w-full bg-[var(--mui-palette-background-default)] text-[var(--mui-palette-text-primary)]'
+                  />
+                  <svg
+                    className='absolute left-3 top-2.5 h-5 w-5 text-[var(--mui-palette-text-secondary)]'
+                    fill='none'
+                    stroke='currentColor'
+                    viewBox='0 0 24 24'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'
+                    />
+                  </svg>
+                </div>
+
+                <button
+                  className='px-4 py-2 rounded-md bg-primary text-white hover:bg-[var(--mui-palette-primary-dark)] transition-colors cursor-pointer'
+                  onClick={() => setShowAddModal(true)}
+                >
+                  Create Token
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div className='flex flex-col md:flex-row items-stretch md:items-center gap-2 w-full md:w-auto'>
-            <ConnectionStatus />
-            <div className='relative'>
-              <select
-                value={tokensPerPage}
-                onChange={e => {
-                  setTokensPerPage(Number(e.target.value))
-                  setCurrentPage(1)
-                }}
-                className='pl-3 pr-8 py-2 rounded-lg border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-primary bg-[var(--mui-palette-background-default)] text-[var(--mui-palette-text-primary)]'
-              >
-                <option value='5'>5 per page</option>
-                <option value='8'>8 per page</option>
-                <option value='10'>10 per page</option>
-                <option value='15'>15 per page</option>
-                <option value='20'>20 per page</option>
-              </select>
-            </div>
+          <div className='flex flex-col sm:flex-row gap-4 w-full xl:w-auto justify-start xl:justify-end'>
+            {(() => {
+              const pnl = Number(sessionProfit || 0).toFixed(10);
+              const isPositive = parseFloat(pnl) >= 0
 
-            <div className='relative w-full md:w-64'>
-              <input
-                type='text'
-                placeholder='Search tokens...'
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                className='pl-10 pr-4 py-2 rounded-lg border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-primary w-full bg-[var(--mui-palette-background-default)] text-[var(--mui-palette-text-primary)]'
-              />
-              <svg
-                className='absolute left-3 top-2.5 h-5 w-5 text-[var(--mui-palette-text-secondary)]'
-                fill='none'
-                stroke='currentColor'
-                viewBox='0 0 24 24'
-              >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth={2}
-                  d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'
-                />
-              </svg>
-            </div>
+              return (
+                <div className='bg-[var(--mui-palette-background-paper)] rounded-xl p-3 min-h-[60px] shadow border border-[var(--mui-palette-divider)] min-w-[160px] w-full sm:w-auto'>
+                  <h4 className='text-xs font-medium text-[var(--mui-palette-text-secondary)] mb-0.5'>Total P&amp;L</h4>
+                  <p
+                    className={`text-base font-semibold break-words ${isPositive ? 'text-green-500' : 'text-red-500'}`}
+                  >
+                    {pnl} SOL
+                  </p>
+                </div>
+              )
+            })()}
 
-            <button
-              className='px-4 py-2 rounded-md bg-primary text-white hover:bg-[var(--mui-palette-primary-dark)] transition-colors cursor-pointer'
-              onClick={() => setShowAddModal(true)}
-            >
-              Create Token
-            </button>
+            <div className='bg-[var(--mui-palette-background-paper)] rounded-xl p-3 min-h-[60px] shadow border border-[var(--mui-palette-divider)] min-w-[160px] w-full sm:w-auto'>
+              <h4 className='text-xs font-medium text-[var(--mui-palette-text-secondary)] mb-0.5'>Master Wallet</h4>
+              <p className='text-base font-semibold text-[var(--mui-palette-text-primary)] break-words'>
+                {(Math.random() * 50).toFixed(2)} SOL
+              </p>
+            </div>
           </div>
         </div>
 
@@ -445,6 +502,10 @@ const AllTokenList = () => {
                   <th className='px-6 py-3 text-left text-xs font-medium text-[var(--mui-palette-text-secondary)] uppercase tracking-wider'>
                     Tweet Source
                   </th>
+                  <th className='px-6 py-3 text-xs font-medium text-[var(--mui-palette-text-secondary)] uppercase tracking-wider'>
+                    P&amp;L
+                  </th>
+
                   <th className='px-6 py-3 text-left text-xs font-medium text-[var(--mui-palette-text-secondary)] uppercase tracking-wider'>
                     Actions
                   </th>
@@ -503,6 +564,15 @@ const AllTokenList = () => {
                       ) : (
                         <span className='text-[var(--mui-palette-text-secondary)]'>N/A</span>
                       )}
+                    </td>
+
+                    <td className='px-6 py-4 whitespace-nowrap text-sm'>
+                      {(() => {
+                        const pnl = Number(token.profit || 0).toFixed(15)
+                        const isPositive = parseFloat(pnl) >= 0
+
+                        return <span className={isPositive ? 'text-green-500' : 'text-red-500'}>{pnl}</span>
+                      })()}
                     </td>
 
                     <td className='px-6 py-4 text-left text-sm'>

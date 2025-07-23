@@ -33,15 +33,14 @@ const SystemMonitorPage = () => {
         const profitResponse = await axiosInstance.get('token/total-profit')
 
         setSessionProfit(profitResponse.data.profit)
-        
+
         // Fetch recent trades
         const tradesResponse = await axiosInstance.get('trade?page_size=5')
 
         setRecentTrades(tradesResponse.data.results)
-        
       } catch (err) {
         console.error('Error fetching data:', err)
-        toast.error(error.response?.data?.message || 'Failed to fetch data', { autoClose: 3000 });
+        toast.error(err.response?.data?.message || 'Failed to fetch data', { autoClose: 3000 })
       } finally {
         setLoading(false)
         setTradesLoading(false)
@@ -51,11 +50,10 @@ const SystemMonitorPage = () => {
     fetchData()
   }, [])
 
-  const formatDateTime = (isoString) => {
+  const formatDateTime = isoString => {
     const date = new Date(isoString)
 
-    
-return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   }
 
   const UsageGauge = ({ label, value, icon }) => {
@@ -89,7 +87,10 @@ return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         <p className='text-sm' style={{ color: 'var(--mui-palette-text-secondary)' }}>
           {title}
         </p>
-        <p className='text-xl font-semibold max-sm:text-[13px]' style={{ color: text }}> {value}</p>
+        <p className='text-xl font-semibold max-sm:text-[13px]' style={{ color: text }}>
+          {' '}
+          {value}
+        </p>
       </div>
     </div>
   )
@@ -234,8 +235,13 @@ return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
               style={{ backgroundColor: 'var(--mui-palette-background-default)' }}
             >
               {tradesLoading ? (
-                <div className="flex justify-center items-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+                <div className='flex justify-center items-center py-8'>
+                  <div className='animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary'></div>
+                </div>
+              ) : recentTrades.length === 0 ? (
+                <div className='flex flex-col items-center justify-center py-8 text-center'>
+                  <BarChart2 size={32} className='text-gray-400 mb-2' />
+                  <p className='text-gray-500'>No recent trades found</p>
                 </div>
               ) : (
                 <div className='overflow-x-auto'>
@@ -256,9 +262,7 @@ return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                           </td>
                           <td className='py-3 px-4 font-medium'>{trade.token_symbol}</td>
                           <td className='py-3 px-4'>${trade.open_price}</td>
-                          <td className={`py-3 px-4 font-semibold ${getStatusStyle(trade.status)}`}>
-                            {trade.status}
-                          </td>
+                          <td className={`py-3 px-4 font-semibold ${getStatusStyle(trade.status)}`}>{trade.status}</td>
                         </tr>
                       ))}
                     </tbody>
