@@ -520,7 +520,7 @@ const AllTokenList = () => {
                     <td className='px-6 py-4 whitespace-nowrap'>
                       <div className='flex items-center'>
                         <img
-                          src={token.logo || 'https://cdn.pixabay.com/photo/2017/01/25/12/31/bitcoin-2007769_1280.jpg'}
+                          src={token.image}
                           alt={token.name}
                           className='h-10 w-10 rounded-full object-cover'
                         />
