@@ -27,6 +27,7 @@ const AllTokenList = () => {
   const [ws, setWs] = useState(null)
   const [isConnected, setIsConnected] = useState(false)
   const [sessionProfit, setSessionProfit] = useState(0)
+  const [masterWallet, setMasterWallet] = useState(0)
 
   const [defaultTradeSettings, setDefaultTradeSettings] = useState({
     sl: 10,
@@ -79,6 +80,21 @@ const AllTokenList = () => {
     }
 
     fetchTotalProfit()
+  }, [])
+
+  useEffect(()=>{
+    const fetchMasterWallet = async () => {
+      try {
+        const response = await axiosInstance.get('/wallet/master-wallet-balance/')
+
+        setMasterWallet(response.data)
+      } catch (error) {
+        console.error('Error fetching master wallet:', error)
+        toast.error(error.response?.data?.message || 'Failed to fetch master wallet data', { autoClose: 3000 })
+      }
+    }
+
+    fetchMasterWallet()
   }, [])
 
   const [newToken, setNewToken] = useState({
@@ -476,7 +492,7 @@ const AllTokenList = () => {
             <div className='bg-[var(--mui-palette-background-paper)] rounded-xl p-3 min-h-[60px] shadow border border-[var(--mui-palette-divider)] min-w-[160px] w-full sm:w-auto'>
               <h4 className='text-xs font-medium text-[var(--mui-palette-text-secondary)] mb-0.5'>Master Wallet</h4>
               <p className='text-base font-semibold text-[var(--mui-palette-text-primary)] break-words'>
-                {(Math.random() * 50).toFixed(2)} SOL
+                {Number(masterWallet?.balance || 0).toFixed(8)} SOL
               </p>
             </div>
           </div>
