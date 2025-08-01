@@ -15,6 +15,7 @@ const defaultTokenData = {
   symbol: '',
   address: '',
   currentPrice: 0,
+  averagePrice: 0,
   priceChange: 0,
   priceChange7d: 0,
   volumeSOL: 0,
@@ -133,7 +134,8 @@ const LiveTokenOverview = () => {
     volumeUSD: null,
     marketCap: null,
     allTimeHigh: null,
-    allTimeLow: null
+    allTimeLow: null,
+    averagePrice: null
   })
 
   const [chartData, setChartData] = useState([])
@@ -148,7 +150,7 @@ const LiveTokenOverview = () => {
 
   useEffect(() => {
     const connectWebSocket = () => {
-      ws.current = new WebSocket(`wss://api.dev.alhpaorbit.com/ws/bot-log/${id}`)
+      ws.current = new WebSocket(`wss://api.dev.alhpaorbit.com/ws/bot-log/${id}/`)
 
       ws.current.onopen = () => {
         console.log('WebSocket connected')
@@ -254,7 +256,8 @@ const LiveTokenOverview = () => {
             volumeUSD: parseFloat(priceData.volume_dollar),
             marketCap: parseFloat(priceData.market_cap),
             allTimeHigh: parseFloat(priceData.all_time_high),
-            allTimeLow: parseFloat(priceData.all_time_low)
+            allTimeLow: parseFloat(priceData.all_time_low),
+            averagePrice: parseFloat(priceData.average_price)
           })
         } catch (error) {
           console.error('Error parsing price WebSocket message:', error)
@@ -414,6 +417,7 @@ const LiveTokenOverview = () => {
             logo: tokenData.logo,
             mint_address: tokenData.mint_address,
             currentPrice: tokenData.current_price || 0,
+            averagePrice: tokenData.average_price || 0,
             marketCap: tokenData.market_cap || 0,
             allTimeHigh: tokenData.highest_price || 0,
             allTimeLow: tokenData.lowest_price || 0,
@@ -503,6 +507,7 @@ const LiveTokenOverview = () => {
 
 
   const getCurrentPrice = () => (tokenPriceWs.price !== null ? tokenPriceWs.price : token.currentPrice)
+  const getAveragePrice = () => (tokenPriceWs.averagePrice !== null ? tokenPriceWs.averagePrice : token.averagePrice)
   const getVolumeSOL = () => (tokenPriceWs.volumeSOL !== null ? tokenPriceWs.volumeSOL : token.volumeSOL)
   const getVolumeUSD = () => (tokenPriceWs.volumeUSD !== null ? tokenPriceWs.volumeUSD : token.volumeUSD)
   const getMarketCap = () => (tokenPriceWs.marketCap !== null ? tokenPriceWs.marketCap : token.marketCap)
@@ -905,6 +910,14 @@ const LiveTokenOverview = () => {
                 </p>
                 <p className='text-lg font-medium' style={{ color: 'var(--mui-palette-text-primary)' }}>
                   1 Billion
+                </p>
+              </div>
+              <div>
+                <p className='text-sm' style={{ color: 'var(--mui-palette-text-secondary)' }}>
+                  Average Price
+                </p>
+                <p className='text-lg font-medium truncate' style={{ color: 'var(--mui-palette-text-primary)' }}>
+                  ${Number(getAveragePrice()).toFixed(15)}
                 </p>
               </div>
             </div>
