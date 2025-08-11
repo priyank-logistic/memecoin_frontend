@@ -31,6 +31,7 @@ import {
   Check,
   ShoppingCart
 } from '@mui/icons-material'
+import MoneyIcon from '@mui/icons-material/Money';
 import { blue, green, orange, red, grey } from '@mui/material/colors'
 import { styled } from '@mui/material/styles'
 import { motion } from 'framer-motion'
@@ -134,7 +135,8 @@ const BotControlPanelPage = () => {
     stopLossPercent: 10,
     autoSellTimeout: 60,
     priority: 'VeryHigh',
-    initialBuyValue: 0.001
+    initialBuyValue: 0.001,
+    minimumBuyValue:0.01
   })
 
   const [isLoading, setIsLoading] = useState(true)
@@ -157,7 +159,8 @@ const BotControlPanelPage = () => {
             stopLossPercent: parseFloat(response.data.sl),
             autoSellTimeout: response.data.sl_time_out,
             priority: response.data.priority,
-            initialBuyValue: parseFloat(response.data.initial_value_buy_trade)
+            initialBuyValue: parseFloat(response.data.initial_value_buy_trade),
+            minimumBuyValue: parseFloat(response.data.minimum_buy_value || 0.00)
           }
 
           setBotSettings(fetchedSettings)
@@ -207,6 +210,10 @@ const BotControlPanelPage = () => {
     setBotSettings(prev => ({ ...prev, initialBuyValue: newValue }))
   }
 
+  const handleMinimumBuyValueChange = (event, newValue) => {
+    setBotSettings(prev => ({ ...prev, minimumBuyValue: newValue }))
+  }
+
   const handleSaveSettings = async () => {
     try {
       setIsSaving(true)
@@ -220,6 +227,7 @@ const BotControlPanelPage = () => {
         max_sol_per_trade: botSettings.maxSolPerTrade.toFixed(9),
         sl_time_out: botSettings.autoSellTimeout,
         initial_value_buy_trade: botSettings.initialBuyValue.toFixed(9),
+        minimum_value_buy_trade: botSettings.minimumBuyValue.toFixed(9),
         priority: botSettings.priority
       }
 
@@ -294,6 +302,22 @@ const BotControlPanelPage = () => {
                   </ParameterCard>
                 </Grid>
 
+                <Grid item xs={12}>
+                  <ParameterCard>
+                    <ParameterInput
+                      label='Minimum Buy Value'
+                      value={botSettings.minimumBuyValue}
+                      onChange={handleMinimumBuyValueChange}
+                      min={0.0}
+                      max={Infinity}
+                      step={0.01}
+                      icon={<ShoppingCart fontSize='small' sx={{ color: green[500] }} />}
+                      unit='SOL'
+                      tooltip='The minimum amount of SOL to use when opening a trade'
+                    />
+                  </ParameterCard>
+                </Grid>
+
                 <Grid item xs={12} style={{ marginTop: '15px' }}>
                   <ParameterCard>
                     <ParameterInput
@@ -303,7 +327,10 @@ const BotControlPanelPage = () => {
                       min={0.0}
                       max={Infinity}
                       step={0.001}
-                      icon={<AttachMoney fontSize='small' sx={{ color: blue[500] }} />}
+
+                      // icon={<SolanaLogo style={{ width: 20, height: 20, color: blue[500] }} />}
+
+                      icon={<MoneyIcon fontSize='small' sx={{ color: blue[500] }} />}
                       unit='SOL'
                       tooltip='The maximum amount of SOL the bot will use for any single trade'
                     />

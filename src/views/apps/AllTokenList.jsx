@@ -70,7 +70,6 @@ const AllTokenList = () => {
         const profitResponse = await axiosInstance.get('token/total-profit')
 
         setSessionProfit(profitResponse.data.profit)
-
       } catch (err) {
         console.error('Error fetching data:', err)
         toast.error(err.response?.data?.message || 'Failed to fetch Total Profit data', { autoClose: 3000 })
@@ -82,7 +81,7 @@ const AllTokenList = () => {
     fetchTotalProfit()
   }, [])
 
-  useEffect(()=>{
+  useEffect(() => {
     const fetchMasterWallet = async () => {
       try {
         const response = await axiosInstance.get('/wallet/master-wallet-balance/')
@@ -101,6 +100,9 @@ const AllTokenList = () => {
     name: '',
     symbol: '',
     description: '',
+    X: '',
+    telegram: '',
+    website: '',
     wallet_count: '',
     amount_per_wallet: '',
     bot_settings: { ...defaultTradeSettings }
@@ -137,7 +139,7 @@ const AllTokenList = () => {
           image: data.logo || 'https://cdn.pixabay.com/photo/2017/01/25/12/31/bitcoin-2007769_1280.jpg',
           is_approved: true,
           tweet_id: data.tweet_source,
-          profit: data.profit || 0,
+          profit: data.profit || 0
 
           // wallet_count: '0',
           // amount_per_wallet: '0',
@@ -360,6 +362,9 @@ const AllTokenList = () => {
         name: '',
         symbol: '',
         description: '',
+        X: '',
+        telegram: '',
+        website: '',
         wallet_count: '',
         amount_per_wallet: '',
         bot_settings: { ...defaultTradeSettings }
@@ -474,7 +479,7 @@ const AllTokenList = () => {
 
           <div className='flex flex-col sm:flex-row gap-4 w-full xl:w-auto justify-start xl:justify-end'>
             {(() => {
-              const pnl = Number(sessionProfit || 0).toFixed(10);
+              const pnl = Number(sessionProfit || 0).toFixed(10)
               const isPositive = parseFloat(pnl) >= 0
 
               return (
@@ -535,11 +540,7 @@ const AllTokenList = () => {
                     </td>
                     <td className='px-6 py-4 whitespace-nowrap'>
                       <div className='flex items-center'>
-                        <img
-                          src={token.image}
-                          alt={token.name}
-                          className='h-10 w-10 rounded-full object-cover'
-                        />
+                        <img src={token.image} alt={token.name} className='h-10 w-10 rounded-full object-cover' />
                         <div className='ml-4'>
                           <div className='text-sm font-medium text-[var(--mui-palette-text-primary)]'>{token.name}</div>
                           <div className='text-sm text-[var(--mui-palette-text-secondary)]'>{token.symbol}</div>
@@ -759,6 +760,46 @@ const AllTokenList = () => {
                           className='mt-1 block w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--mui-palette-background-paper)]'
                         ></textarea>
                       </div>
+                      <div>
+                        <label className='block text-sm font-medium text-[var(--mui-palette-text-primary)]'>
+                          X (Twitter) Link
+                        </label>
+                        <input
+                          type='url'
+                          value={newToken.xLink}
+                          onChange={e => setNewToken(prev => ({ ...prev, X: e.target.value }))}
+                          placeholder='https://x.com/xyz'
+                          className='mt-1 block w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--mui-palette-background-paper)]'
+                        />
+                      </div>
+
+                      {/* Telegram Link */}
+                      <div>
+                        <label className='block text-sm font-medium text-[var(--mui-palette-text-primary)]'>
+                          Telegram Link
+                        </label>
+                        <input
+                          type='url'
+                          value={newToken.telegramLink}
+                          onChange={e => setNewToken(prev => ({ ...prev, telegram: e.target.value }))}
+                          placeholder='https://t.me/xyz'
+                          className='mt-1 block w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--mui-palette-background-paper)]'
+                        />
+                      </div>
+
+                      {/* Website Link */}
+                      <div>
+                        <label className='block text-sm font-medium text-[var(--mui-palette-text-primary)]'>
+                          Website Link
+                        </label>
+                        <input
+                          type='url'
+                          value={newToken.website}
+                          onChange={e => setNewToken(prev => ({ ...prev, website: e.target.value }))}
+                          placeholder='https://xyz.com'
+                          className='mt-1 block w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--mui-palette-background-paper)]'
+                        />
+                      </div>
                     </div>
                     <div className='space-y-4'>
                       <div>
@@ -914,6 +955,9 @@ const AllTokenList = () => {
                           name: '',
                           symbol: '',
                           description: '',
+                          X: '',
+                          telegram: '',
+                          website: '',
                           wallet_count: '10',
                           amount_per_wallet: '10',
                           bot_settings: { ...defaultTradeSettings }

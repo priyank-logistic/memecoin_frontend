@@ -19,6 +19,7 @@ const defaultTokenData = {
   priceChange: 0,
   priceChange7d: 0,
   volumeSOL: 0,
+  holder_count: 0,
   volumeUSD: 0,
   liquidity: 0,
   holders: 0,
@@ -32,7 +33,7 @@ const defaultTokenData = {
   })),
   socials: {
     website: null,
-    twitter: null,
+    x: null,
     telegram: null
   },
   description: ''
@@ -131,6 +132,7 @@ const LiveTokenOverview = () => {
   const [tokenPriceWs, setTokenPriceWs] = useState({
     price: null,
     volumeSOL: null,
+    holder_count: null,
     volumeUSD: null,
     marketCap: null,
     allTimeHigh: null,
@@ -253,6 +255,7 @@ const LiveTokenOverview = () => {
           setTokenPriceWs({
             price: parseFloat(priceData.token_price),
             volumeSOL: parseFloat(priceData.volume_sol),
+            holder_count: parseFloat(priceData.holder_count),
             volumeUSD: parseFloat(priceData.volume_dollar),
             marketCap: parseFloat(priceData.market_cap),
             allTimeHigh: parseFloat(priceData.all_time_high),
@@ -410,7 +413,7 @@ const LiveTokenOverview = () => {
             description: tokenData.description,
             socials: {
               website: tokenData.website,
-              twitter: tokenData.x,
+              x: tokenData.x,
               telegram: tokenData.telegram
             },
             created_at: tokenData.created_at,
@@ -422,6 +425,7 @@ const LiveTokenOverview = () => {
             allTimeHigh: tokenData.highest_price || 0,
             allTimeLow: tokenData.lowest_price || 0,
             volumeSOL: tokenData.volume_sol || 0,
+            holder_count: tokenData.holder_count || 0,
             volumeUSD: tokenData.volume_dollar || 0
           })
 
@@ -509,6 +513,7 @@ const LiveTokenOverview = () => {
   const getCurrentPrice = () => (tokenPriceWs.price !== null ? tokenPriceWs.price : token.currentPrice)
   const getAveragePrice = () => (tokenPriceWs.averagePrice !== null ? tokenPriceWs.averagePrice : token.averagePrice)
   const getVolumeSOL = () => (tokenPriceWs.volumeSOL !== null ? tokenPriceWs.volumeSOL : token.volumeSOL)
+  const getHolderCount = () => (tokenPriceWs.holder_count !== null ? tokenPriceWs.holder_count : token.holder_count)
   const getVolumeUSD = () => (tokenPriceWs.volumeUSD !== null ? tokenPriceWs.volumeUSD : token.volumeUSD)
   const getMarketCap = () => (tokenPriceWs.marketCap !== null ? tokenPriceWs.marketCap : token.marketCap)
   
@@ -654,7 +659,7 @@ const LiveTokenOverview = () => {
               </div>
             </div>
 
-            <div className='grid grid-cols-2 gap-4'>
+            <div className='grid grid-cols-3 gap-4'>
               <div className='p-5 rounded-xl' style={{ backgroundColor: 'var(--mui-palette-background-default)' }}>
                 <p className='text-sm mb-1' style={{ color: 'var(--mui-palette-text-secondary)' }}>
                   Market Cap
@@ -684,6 +689,15 @@ const LiveTokenOverview = () => {
                 >
                   {Number(getVolumeSOL()).toFixed(10)} SOL
                 </div>
+              </div>
+              
+              <div className='p-5 rounded-xl' style={{ backgroundColor: 'var(--mui-palette-background-default)' }}>
+                <p className='text-sm mb-1' style={{ color: 'var(--mui-palette-text-secondary)' }}>
+                  holder count
+                </p>
+                <p className='text-xl lg:text-2xl ml-4 font-bold' style={{ color: 'var(--mui-palette-text-primary)' }}>
+                {getHolderCount()}
+                </p>
               </div>
             </div>
           </>
