@@ -39,27 +39,27 @@ const defaultTokenData = {
   description: ''
 }
 
-const getTimeSinceLaunch = (launchTime) => {
-  if (!launchTime) return 'N/A';
-  
-  const launch = new Date(launchTime);
-  const now = new Date();
-  const diffTime = Math.abs(now - launch);
+const getTimeSinceLaunch = launchTime => {
+  if (!launchTime) return 'N/A'
 
-  const diffYears = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
-  const diffMonths = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 30));
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  const diffHours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const diffMinutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
-  
-  if (diffYears > 0) return `${diffYears}y ago`;
-  if (diffMonths > 0) return `${diffMonths}mo ago`;
-  if (diffDays > 0) return `${diffDays}d ago`;
-  if (diffHours > 0) return `${diffHours}h ago`;
-  if (diffMinutes > 0) return `${diffMinutes}m ago`;
-  
-  return 'Just now';
-};
+  const launch = new Date(launchTime)
+  const now = new Date()
+  const diffTime = Math.abs(now - launch)
+
+  const diffYears = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365))
+  const diffMonths = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 30))
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+  const diffHours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+  const diffMinutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60))
+
+  if (diffYears > 0) return `${diffYears}y ago`
+  if (diffMonths > 0) return `${diffMonths}mo ago`
+  if (diffDays > 0) return `${diffDays}d ago`
+  if (diffHours > 0) return `${diffHours}h ago`
+  if (diffMinutes > 0) return `${diffMinutes}m ago`
+
+  return 'Just now'
+}
 
 const formatNumber = (num, decimals = 2) => {
   if (!num) return '$0.00'
@@ -474,26 +474,6 @@ const LiveTokenOverview = () => {
     fetchPriceChartData()
   }, [id])
 
-  const getFilteredData = () => {
-    if (!chartData.length) return []
-
-    const now = new Date()
-
-    const timeRanges = {
-      '1H': new Date(now.getTime() - 60 * 60 * 1000),
-      '6H': new Date(now.getTime() - 6 * 60 * 60 * 1000),
-      '24H': new Date(now.getTime() - 24 * 60 * 60 * 1000),
-      '1W': new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
-      '1M': new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-    }
-
-    if (timeRange && timeRanges[timeRange]) {
-      return chartData.filter(item => new Date(item.timestamp) > timeRanges[timeRange])
-    }
-
-    return chartData
-  }
-
   const copyToClipboard = text => {
     if (!text) return
     navigator.clipboard.writeText(text)
@@ -509,14 +489,13 @@ const LiveTokenOverview = () => {
     )
   }
 
-
   const getCurrentPrice = () => (tokenPriceWs.price !== null ? tokenPriceWs.price : token.currentPrice)
   const getAveragePrice = () => (tokenPriceWs.averagePrice !== null ? tokenPriceWs.averagePrice : token.averagePrice)
   const getVolumeSOL = () => (tokenPriceWs.volumeSOL !== null ? tokenPriceWs.volumeSOL : token.volumeSOL)
   const getHolderCount = () => (tokenPriceWs.holder_count !== null ? tokenPriceWs.holder_count : token.holder_count)
   const getVolumeUSD = () => (tokenPriceWs.volumeUSD !== null ? tokenPriceWs.volumeUSD : token.volumeUSD)
   const getMarketCap = () => (tokenPriceWs.marketCap !== null ? tokenPriceWs.marketCap : token.marketCap)
-  
+
   const getAllTimeHigh = () => (tokenPriceWs.allTimeHigh !== null ? tokenPriceWs.allTimeHigh : token.allTimeHigh)
   const getAllTimeLow = () => (tokenPriceWs.allTimeLow !== null ? tokenPriceWs.allTimeLow : token.allTimeLow)
 
@@ -690,13 +669,13 @@ const LiveTokenOverview = () => {
                   {Number(getVolumeSOL()).toFixed(10)} SOL
                 </div>
               </div>
-              
+
               <div className='p-5 rounded-xl' style={{ backgroundColor: 'var(--mui-palette-background-default)' }}>
                 <p className='text-sm mb-1' style={{ color: 'var(--mui-palette-text-secondary)' }}>
                   holder count
                 </p>
                 <p className='text-xl lg:text-2xl ml-4 font-bold' style={{ color: 'var(--mui-palette-text-primary)' }}>
-                {getHolderCount()}
+                  {getHolderCount()}
                 </p>
               </div>
             </div>
@@ -705,28 +684,16 @@ const LiveTokenOverview = () => {
       </div>
 
       <div className='p-5 rounded-xl mb-6' style={{ backgroundColor: 'var(--mui-palette-background-default)' }}>
-        <div className='flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4'>
-          <div
-            className='flex flex-row gap-1 sm:gap-2 justify-center p-1 rounded-lg'
-            style={{ backgroundColor: 'var(--mui-palette-background-paper)' }}
-          >
-            {['1H', '6H', '24H', '1W', '1M'].map(range => (
-              <motion.button
-                key={range}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setTimeRange(range)}
-                className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-md transition-colors ${
-                  timeRange === range ? 'font-medium' : 'opacity-60 hover:opacity-100'
-                }`}
-                style={{
-                  color: timeRange === range ? 'black' : 'var(--mui-palette-text-primary)',
-                  backgroundColor: timeRange === range ? 'var(--mui-palette-primary-light)' : 'transparent'
-                }}
-              >
-                {range}
-              </motion.button>
-            ))}
+        <div className='flex justify-between items-center mb-6'>
+          <div></div>
+
+          <div className='flex items-center gap-2'>
+            <p className='text-sm' style={{ color: 'var(--mui-palette-text-secondary)' }}>
+              Average Price:
+            </p>
+            <p className='text-lg font-medium truncate' style={{ color: 'var(--mui-palette-text-primary)' }}>
+              ${Number(getAveragePrice()).toFixed(15)}
+            </p>
           </div>
         </div>
 
@@ -735,9 +702,9 @@ const LiveTokenOverview = () => {
             <div className='flex items-center justify-center h-full'>
               <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary'></div>
             </div>
-          ) : getFilteredData()?.length > 0 ? (
+          ) : chartData?.length > 0 ? (
             <ResponsiveContainer width='100%' height='100%'>
-              <LineChart data={getFilteredData()}>
+              <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray='3 3' stroke='var(--mui-palette-divider)' vertical={false} />
                 <XAxis
                   dataKey='time'
@@ -924,14 +891,6 @@ const LiveTokenOverview = () => {
                 </p>
                 <p className='text-lg font-medium' style={{ color: 'var(--mui-palette-text-primary)' }}>
                   1 Billion
-                </p>
-              </div>
-              <div>
-                <p className='text-sm' style={{ color: 'var(--mui-palette-text-secondary)' }}>
-                  Average Price
-                </p>
-                <p className='text-lg font-medium truncate' style={{ color: 'var(--mui-palette-text-primary)' }}>
-                  ${Number(getAveragePrice()).toFixed(15)}
                 </p>
               </div>
             </div>

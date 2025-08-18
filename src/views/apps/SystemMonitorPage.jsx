@@ -12,12 +12,12 @@ const SystemMonitorPage = () => {
   const [loading, setLoading] = useState(true)
   const [recentTrades, setRecentTrades] = useState([])
   const [tradesLoading, setTradesLoading] = useState(true)
+  const [activeTokens, setActiveTokens] = useState(0)
 
   const [systemData, setSystemData] = useState({
     cpu: 42,
     ram: 67,
     uptime: '23:45:12',
-    activeTokens: 1,
     logs: [
       { id: 1, level: 'error', message: 'RPC connection timeout', timestamp: '13:42:05' },
       { id: 2, level: 'warning', message: 'High latency detected', timestamp: '13:40:12' },
@@ -38,6 +38,10 @@ const SystemMonitorPage = () => {
         const tradesResponse = await axiosInstance.get('trade?page_size=5')
 
         setRecentTrades(tradesResponse.data.results)
+
+        const activeTokensResponse = await axiosInstance.get('token/active-token')
+
+        setActiveTokens(activeTokensResponse.data.active_token_count)
       } catch (err) {
         console.error('Error fetching data:', err)
         toast.error(err.response?.data?.message || 'Failed to fetch data', { autoClose: 3000 })
@@ -175,7 +179,7 @@ const SystemMonitorPage = () => {
             />
             <StatusCard
               title='Active Tokens'
-              value={systemData.activeTokens}
+              value={activeTokens}
               icon={<Database size={20} className='text-blue-400' />}
             />
             <StatusCard

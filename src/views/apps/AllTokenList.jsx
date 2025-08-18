@@ -593,7 +593,7 @@ const AllTokenList = () => {
                     </td>
 
                     <td className='px-6 py-4 text-left text-sm'>
-                      <a href={`/apps/live-token-overview/${token.id}`} target='_blank' rel='noopener noreferrer'>
+                      <a href={`/apps/live-token-overview/${token.id}`} target='_parent' rel='noopener noreferrer'>
                         <button className='text-primary hover:text-blue-700 px-3 py-1 rounded-md bg-primaryLighter hover:bg-primaryLight transition-colors cursor-pointer'>
                           View Details
                         </button>
