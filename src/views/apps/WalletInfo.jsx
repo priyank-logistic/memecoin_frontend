@@ -114,6 +114,10 @@ const WalletInfo = () => {
     }
   }
 
+  const getDisplayIndex = tokenIndex => {
+    return (currentPage - 1) * walletsPerPage + tokenIndex + 1
+  }
+
   if (loading && wallets.length === 0) {
     return (
       <div className='flex justify-center items-center h-64'>
@@ -244,7 +248,7 @@ const WalletInfo = () => {
               <thead className='bg-[var(--mui-palette-background-default)]'>
                 <tr>
                   <th className='px-6 py-3 text-left text-xs font-medium text-[var(--mui-palette-text-secondary)] uppercase tracking-wider'>
-                    ID
+                    #
                   </th>
                   <th className='px-6 py-3 text-left text-xs font-medium text-[var(--mui-palette-text-secondary)] uppercase tracking-wider'>
                     Wallet Public Key
@@ -273,7 +277,7 @@ const WalletInfo = () => {
                 {filteredWallets.map((wallet,index) => (
                   <tr key={wallet.id} className='transition-colors bg-[var(--mui-palette-background-default)]'>
                     <td className='px-6 py-5 whitespace-nowrap text-sm text-[var(--mui-palette-text-primary)]'>
-                      {index + 1}
+                    {getDisplayIndex(index)}
                     </td>
                     <td className='px-6 py-5 whitespace-nowrap text-sm text-[var(--mui-palette-text-primary)]'>
                       <div

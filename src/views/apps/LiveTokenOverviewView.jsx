@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef } from 'react'
 
 import { useParams, useRouter } from 'next/navigation'
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { Clock, ExternalLink, Copy, ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { toast } from 'react-toastify'
@@ -100,7 +99,6 @@ const LiveTokenOverview = () => {
   })
 
   const [error, setError] = useState(null)
-  const [timeRange, setTimeRange] = useState('1M')
   const [copied, setCopied] = useState(false)
 
   const [activeTrades, setActiveTrades] = useState({
@@ -140,8 +138,6 @@ const LiveTokenOverview = () => {
     averagePrice: null
   })
 
-  const [chartData, setChartData] = useState([])
-  const [isChartLoading, setIsChartLoading] = useState(true)
 
   const updateLoadingState = (section, isLoading) => {
     setLoadingStates(prev => ({
@@ -234,23 +230,6 @@ const LiveTokenOverview = () => {
       priceWs.onmessage = event => {
         try {
           const priceData = JSON.parse(event.data)
-
-          const newPoint = {
-            // time: new Date(priceData.timestamp).toLocaleTimeString(),
-            time: new Date(priceData.timestamp).toISOString(),
-            price: parseFloat(priceData.token_price),
-            timestamp: priceData.timestamp
-          }
-
-          setChartData(prev => {
-            const exists = prev.some(item => item.timestamp === newPoint.timestamp)
-
-            if (!exists) {
-              return [...prev, newPoint].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)).slice(-100)
-            }
-
-            return prev
-          })
 
           setTokenPriceWs({
             price: parseFloat(priceData.token_price),
@@ -447,32 +426,6 @@ const LiveTokenOverview = () => {
 
     fetchTokenData()
   }, [id, router])
-
-  const fetchPriceChartData = async () => {
-    try {
-      setIsChartLoading(true)
-      const response = await axiosInstance.get(`/token/price-chart/${id}`)
-
-      if (response.data?.data) {
-        const formattedData = response.data.data.map(item => ({
-          time: new Date(item.created_at).toLocaleTimeString(),
-          price: parseFloat(item.token_price),
-          timestamp: item.created_at
-        }))
-
-        setChartData(formattedData)
-      }
-    } catch (error) {
-      console.error('Error fetching price chart data:', error)
-      toast.error(error.response?.data?.error || 'Failed to load chart data', { autoClose: 3000 })
-    } finally {
-      setIsChartLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchPriceChartData()
-  }, [id])
 
   const copyToClipboard = text => {
     if (!text) return
@@ -697,167 +650,13 @@ const LiveTokenOverview = () => {
           </div>
         </div>
 
-        <div className='h-80'>
-          {loadingStates.tokenData || isChartLoading ? (
-            <div className='flex items-center justify-center h-full'>
-              <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary'></div>
-            </div>
-          ) : chartData?.length > 0 ? (
-            <ResponsiveContainer width='100%' height='100%'>
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray='3 3' stroke='var(--mui-palette-divider)' vertical={false} />
-                <XAxis
-                  dataKey='time'
-                  stroke='var(--mui-palette-text-secondary)'
-                  axisLine={false}
-                  tickLine={false}
-                  tickMargin={10}
-                />
-                <YAxis
-                  dataKey='price'
-                  stroke='var(--mui-palette-text-secondary)'
-                  domain={['auto', 'auto']}
-                  tickFormatter={value => `${Number(value).toFixed(8)}`}
-                  axisLine={false}
-                  tickLine={false}
-                  tickMargin={10}
-                  width={100}
-                  tick={({ x, y, payload }) => (
-                    <text
-                      x={x}
-                      y={y}
-                      dy={4}
-                      dx={-5}
-                      textAnchor='end'
-                      fill='var(--mui-palette-text-secondary)'
-                      title={payload.value}
-                    >
-                      <tspan>
-                        <title>{Number(payload.value).toFixed(15)}</title>
-                        {Number(payload.value).toFixed(8)}
-                      </tspan>
-                    </text>
-                  )}
-                />
-                <Tooltip
-                  formatter={value => [`$${Number(value).toFixed(15)}`, 'Price']}
-                  labelFormatter={label => `Time: ${label}`}
-                  contentStyle={{
-                    backgroundColor: 'var(--mui-palette-background-paper)',
-                    borderColor: 'var(--mui-palette-divider)',
-                    color: 'var(--mui-palette-text-primary)',
-                    borderRadius: '0.5rem',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                  }}
-                />
-                <Line
-                  type='monotone'
-                  dataKey='price'
-                  stroke='var(--mui-palette-primary-main)'
-                  strokeWidth={3}
-                  dot={false}
-                  activeDot={{
-                    r: 6,
-                    strokeWidth: 2,
-                    stroke: 'var(--mui-palette-background-paper)'
-                  }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className='flex flex-col items-center justify-center h-full text-center p-4'>
-              <svg width='160' height='120' viewBox='0 0 160 120' fill='none' xmlns='http://www.w3.org/2000/svg'>
-                <path
-                  d='M40 60L60 40L80 70L100 30L120 50'
-                  stroke='var(--mui-palette-primary-main)'
-                  stroke-width='3'
-                  stroke-linecap='round'
-                  stroke-linejoin='round'
-                  fill='none'
-                />
-                <path
-                  d='M40 60L60 40L80 70L100 30L120 50'
-                  stroke='var(--mui-palette-primary-main)'
-                  stroke-width='10'
-                  stroke-linecap='round'
-                  stroke-linejoin='round'
-                  stroke-opacity='0.1'
-                  fill='none'
-                />
-                <circle
-                  cx='40'
-                  cy='60'
-                  r='4'
-                  fill='var(--mui-palette-background-paper)'
-                  stroke='var(--mui-palette-primary-main)'
-                  stroke-width='2'
-                />
-                <circle
-                  cx='60'
-                  cy='40'
-                  r='4'
-                  fill='var(--mui-palette-background-paper)'
-                  stroke='var(--mui-palette-primary-main)'
-                  stroke-width='2'
-                />
-                <circle
-                  cx='80'
-                  cy='70'
-                  r='4'
-                  fill='var(--mui-palette-background-paper)'
-                  stroke='var(--mui-palette-primary-main)'
-                  stroke-width='2'
-                />
-                <circle
-                  cx='100'
-                  cy='30'
-                  r='4'
-                  fill='var(--mui-palette-background-paper)'
-                  stroke='var(--mui-palette-primary-main)'
-                  stroke-width='2'
-                />
-                <circle
-                  cx='120'
-                  cy='50'
-                  r='4'
-                  fill='var(--mui-palette-background-paper)'
-                  stroke='var(--mui-palette-primary-main)'
-                  stroke-width='2'
-                />
-                <path
-                  d='M140 100H20V20'
-                  stroke='var(--mui-palette-text-secondary)'
-                  stroke-width='2'
-                  stroke-linecap='round'
-                />
-                <line
-                  x1='20'
-                  y1='100'
-                  x2='140'
-                  y2='100'
-                  stroke='var(--mui-palette-text-secondary)'
-                  stroke-width='2'
-                  stroke-linecap='round'
-                />
-                <path
-                  d='M140 100L135 95M140 100L135 105'
-                  stroke='var(--mui-palette-text-secondary)'
-                  stroke-width='2'
-                  stroke-linecap='round'
-                />
-                <path
-                  d='M20 20L15 25M20 20L25 25'
-                  stroke='var(--mui-palette-text-secondary)'
-                  stroke-width='2'
-                  stroke-linecap='round'
-                />
-              </svg>
-
-              <h3 className='text-lg font-medium text-gray-900'>Graph not found</h3>
-              <p className='mt-1 text-sm text-gray-500'>No data available to display the chart.</p>
-            </div>
-          )}
-        </div>
+        <iframe
+          width='100%'
+          height='600'
+          src={`https://birdeye.so/tv-widget/${token.mint_address}?chain=solana&viewMode=pair&chartInterval=1h&chartType=CANDLE&chartLeftToolbar=show&theme=dark`}
+          frameborder='0'
+          allowfullscreen
+        ></iframe>
       </div>
 
       <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-6'>
