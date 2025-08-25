@@ -285,6 +285,10 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
           {/* My Wallet Info */}
           {dictionary['navigation'].WalletInfo}
         </MenuItem>
+        <MenuItem href={`/${locale}/apps/x-account-info`} icon={<i className='tabler-file-info' />}>
+          {/* X Account Info */}
+          {dictionary['navigation'].XAccountInfo}
+        </MenuItem>
         <MenuItem href={`/${locale}/apps/Bot-control-panel`} icon={<i className='tabler-settings' />}>
           {/* Bot Control Panel */}
           {dictionary['navigation'].BotControlPanel}

@@ -653,7 +653,7 @@ const LiveTokenOverview = () => {
         <iframe
           width='100%'
           height='600'
-          src={`https://birdeye.so/tv-widget/${token.mint_address}?chain=solana&viewMode=pair&chartInterval=1h&chartType=CANDLE&chartLeftToolbar=show&theme=dark`}
+          src={`https://birdeye.so/tv-widget/${token.mint_address}?chain=solana&viewMode=pair&chartInterval=5&chartType=CANDLE&chartLeftToolbar=show&theme=dark`}
           frameborder='0'
           allowfullscreen
         ></iframe>
