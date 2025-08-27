@@ -543,10 +543,16 @@ const LiveTokenOverview = () => {
                         href={url}
                         target='_blank'
                         rel='noopener noreferrer'
-                        className='p-1.5 rounded-full hover:opacity-80 transition-opacity'
-                        style={{ backgroundColor: 'var(--mui-palette-background-default)' }}
+                        className='flex items-center justify-center px-3 py-1 rounded-full transition-all duration-200 hover:opacity-90'
+                        style={{
+                          backgroundColor: 'var(--mui-palette-background-paper)',
+                          border: '1px solid var(--mui-palette-divider)'
+                        }}
                       >
-                        <span className='text-xs capitalize' style={{ color: 'var(--mui-palette-text-secondary)' }}>
+                        <span
+                          className='text-sm font-medium capitalize'
+                          style={{ color: 'var(--mui-palette-text-primary)' }}
+                        >
                           {platform}
                         </span>
                       </a>

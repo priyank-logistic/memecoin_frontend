@@ -100,7 +100,7 @@ const AllTokenList = () => {
     name: '',
     symbol: '',
     description: '',
-    X: '',
+    x: '',
     telegram: '',
     website: '',
     wallet_count: '',
@@ -139,7 +139,10 @@ const AllTokenList = () => {
           image: data.logo || 'https://cdn.pixabay.com/photo/2017/01/25/12/31/bitcoin-2007769_1280.jpg',
           is_approved: true,
           tweet_id: data.tweet_source,
-          profit: data.profit || 0
+          profit: data.profit || 0,
+          x:data.x,
+          telegram: data.telegram,
+          website: data.website,
 
           // wallet_count: '0',
           // amount_per_wallet: '0',
@@ -342,6 +345,10 @@ const AllTokenList = () => {
         formData.append(`bot_settings.${key}`, value.toString())
       })
 
+      formData.append('x', newToken.x)
+      formData.append('telegram', newToken.telegram)
+      formData.append('website', newToken.website)
+
       // Append bot settings
       formData.append('bot_settings.sl', newToken.bot_settings.sl.toString())
       formData.append('bot_settings.tp', newToken.bot_settings.tp.toString())
@@ -362,7 +369,7 @@ const AllTokenList = () => {
         name: '',
         symbol: '',
         description: '',
-        X: '',
+        x: '',
         telegram: '',
         website: '',
         wallet_count: '',
@@ -767,7 +774,7 @@ const AllTokenList = () => {
                         <input
                           type='url'
                           value={newToken.xLink}
-                          onChange={e => setNewToken(prev => ({ ...prev, X: e.target.value }))}
+                          onChange={e => setNewToken(prev => ({ ...prev, x: e.target.value }))}
                           placeholder='https://x.com/xyz'
                           className='mt-1 block w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--mui-palette-background-paper)]'
                         />
@@ -955,7 +962,7 @@ const AllTokenList = () => {
                           name: '',
                           symbol: '',
                           description: '',
-                          X: '',
+                          x: '',
                           telegram: '',
                           website: '',
                           wallet_count: '10',
