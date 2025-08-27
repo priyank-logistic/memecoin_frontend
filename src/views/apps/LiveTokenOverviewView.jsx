@@ -748,13 +748,13 @@ const LiveTokenOverview = () => {
           <div className='flex items-center gap-2'>
             <button
               onClick={emergencyStop}
-              className='px-3 py-1 rounded-lg text-xs hover:opacity-80 transition-opacity'
+              className='px-4 py-2 rounded-lg text-xs hover:opacity-80 transition-opacity'
               style={{
                 backgroundColor: 'var(--mui-palette-error-light)',
                 color: 'black'
               }}
             >
-              sell everthing
+              Sell Everything
             </button>
             <span className='text-sm' style={{ color: 'var(--mui-palette-text-secondary)' }}>
               {activeTrades?.pagination.count} active
