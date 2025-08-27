@@ -184,7 +184,7 @@ const SystemMonitorPage = () => {
             />
             <StatusCard
               title='Session Profit'
-              value={`$${sessionProfit}`}
+              value={`${sessionProfit} SOL`}
               icon={<DollarSign size={20} className='text-green-400' />}
               text={sessionProfit >= 0 ? 'var(--mui-palette-success-main)' : 'var(--mui-palette-error-main)'}
             />

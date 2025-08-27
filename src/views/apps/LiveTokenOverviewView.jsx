@@ -35,7 +35,8 @@ const defaultTokenData = {
     x: null,
     telegram: null
   },
-  description: ''
+  description: '',
+  profit: 0
 }
 
 const getTimeSinceLaunch = launchTime => {
@@ -95,7 +96,8 @@ const LiveTokenOverview = () => {
     tokenData: true,
     activeTrades: true,
     tradeHistory: true,
-    logs: true
+    logs: true,
+    emergencyStop: false
   })
 
   const [error, setError] = useState(null)
@@ -135,9 +137,9 @@ const LiveTokenOverview = () => {
     marketCap: null,
     allTimeHigh: null,
     allTimeLow: null,
-    averagePrice: null
+    averagePrice: null,
+    profit: null
   })
-
 
   const updateLoadingState = (section, isLoading) => {
     setLoadingStates(prev => ({
@@ -232,14 +234,15 @@ const LiveTokenOverview = () => {
           const priceData = JSON.parse(event.data)
 
           setTokenPriceWs({
-            price: parseFloat(priceData.token_price),
-            volumeSOL: parseFloat(priceData.volume_sol),
-            holder_count: parseFloat(priceData.holder_count),
-            volumeUSD: parseFloat(priceData.volume_dollar),
-            marketCap: parseFloat(priceData.market_cap),
-            allTimeHigh: parseFloat(priceData.all_time_high),
-            allTimeLow: parseFloat(priceData.all_time_low),
-            averagePrice: parseFloat(priceData.average_price)
+            price: parseFloat(priceData?.token_price),
+            volumeSOL: parseFloat(priceData?.volume_sol),
+            holder_count: parseFloat(priceData?.holder_count),
+            volumeUSD: parseFloat(priceData?.volume_dollar),
+            marketCap: parseFloat(priceData?.market_cap),
+            allTimeHigh: parseFloat(priceData?.all_time_high),
+            allTimeLow: parseFloat(priceData?.all_time_low),
+            averagePrice: parseFloat(priceData?.average_price),
+            profit: parseFloat(priceData?.profit)
           })
         } catch (error) {
           console.error('Error parsing price WebSocket message:', error)
@@ -277,11 +280,11 @@ const LiveTokenOverview = () => {
 
       if (response.data) {
         setTradeHistory({
-          data: response.data.results,
+          data: response?.data?.results,
           pagination: {
-            count: response.data.count,
-            totalPages: response.data.total_pages,
-            currentPage: response.data.current_page,
+            count: response?.data?.count,
+            totalPages: response?.data?.total_pages,
+            currentPage: response?.data?.current_page,
             pageSize: pageSize
           }
         })
@@ -301,11 +304,11 @@ const LiveTokenOverview = () => {
 
       if (response.data) {
         setActiveTrades({
-          data: response.data.results,
+          data: response?.data?.results,
           pagination: {
-            count: response.data.count,
-            totalPages: response.data.total_pages,
-            currentPage: response.data.current_page,
+            count: response?.data?.count,
+            totalPages: response?.data?.total_pages,
+            currentPage: response?.data?.current_page,
             pageSize: pageSize
           }
         })
@@ -376,6 +379,20 @@ const LiveTokenOverview = () => {
     }
   }
 
+  const emergencyStop = async () => {
+    if (!window.confirm('WARNING: This will close ALL active trades and stop the bot. Proceed?')) return
+
+    try {
+      updateLoadingState('emergencyStop', true)
+      await axiosInstance.post('/bot-control/emergency-stop/')
+      toast.success('Emergency selling started!', { autoClose: 3000 })
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Emergency stop failed', { autoClose: 3000 })
+    } finally {
+      updateLoadingState('emergencyStop', false)
+    }
+  }
+
   useEffect(() => {
     const fetchTokenData = async () => {
       try {
@@ -387,25 +404,26 @@ const LiveTokenOverview = () => {
 
           setToken({
             ...defaultTokenData,
-            name: tokenData.name,
-            symbol: tokenData.symbol,
-            description: tokenData.description,
+            name: tokenData?.name,
+            symbol: tokenData?.symbol,
+            description: tokenData?.description,
             socials: {
-              website: tokenData.website,
-              x: tokenData.x,
-              telegram: tokenData.telegram
+              website: tokenData?.website,
+              x: tokenData?.x,
+              telegram: tokenData?.telegram
             },
-            created_at: tokenData.created_at,
-            logo: tokenData.logo,
-            mint_address: tokenData.mint_address,
-            currentPrice: tokenData.current_price || 0,
-            averagePrice: tokenData.average_price || 0,
-            marketCap: tokenData.market_cap || 0,
-            allTimeHigh: tokenData.highest_price || 0,
-            allTimeLow: tokenData.lowest_price || 0,
-            volumeSOL: tokenData.volume_sol || 0,
-            holder_count: tokenData.holder_count || 0,
-            volumeUSD: tokenData.volume_dollar || 0
+            created_at: tokenData?.created_at,
+            logo: tokenData?.logo,
+            mint_address: tokenData?.mint_address,
+            currentPrice: tokenData?.current_price || 0,
+            averagePrice: tokenData?.average_price || 0,
+            marketCap: tokenData?.market_cap || 0,
+            allTimeHigh: tokenData?.highest_price || 0,
+            allTimeLow: tokenData?.lowest_price || 0,
+            volumeSOL: tokenData?.volume_sol || 0,
+            holder_count: tokenData?.holder_count || 0,
+            volumeUSD: tokenData?.volume_dollar || 0,
+            profit: tokenData?.profit || 0
           })
 
           await Promise.all([fetchLogs(id), fetchActiveTrades(tokenData.symbol), fetchTradeHistory(tokenData.symbol)])
@@ -451,6 +469,7 @@ const LiveTokenOverview = () => {
 
   const getAllTimeHigh = () => (tokenPriceWs.allTimeHigh !== null ? tokenPriceWs.allTimeHigh : token.allTimeHigh)
   const getAllTimeLow = () => (tokenPriceWs.allTimeLow !== null ? tokenPriceWs.allTimeLow : token.allTimeLow)
+  const getProfit = () => (tokenPriceWs.profit !== null ? tokenPriceWs.profit : token.profit)
 
   return (
     <motion.div
@@ -461,7 +480,7 @@ const LiveTokenOverview = () => {
       style={{ backgroundColor: 'var(--mui-palette-background-paper)', border: '1px solid var(--mui-palette-divider)' }}
     >
       <div className='flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4'>
-        {loadingStates.tokenData ? (
+        {loadingStates?.tokenData ? (
           <SkeletonLoader height='h-10' width='w-full' />
         ) : (
           <div className='flex items-start gap-4 w-full md:w-auto'>
@@ -469,11 +488,11 @@ const LiveTokenOverview = () => {
               className='w-14 h-14 rounded-xl flex items-center justify-center shadow-sm'
               style={{ backgroundColor: 'var(--mui-palette-primary-light)' }}
             >
-              {token.logo ? (
-                <img src={token.logo} alt={token.name} className='w-full h-full rounded-xl object-cover' />
+              {token?.logo ? (
+                <img src={token?.logo} alt={token?.name} className='w-full h-full rounded-xl object-cover' />
               ) : (
                 <span className='text-2xl font-bold' style={{ color: 'var(--mui-palette-text-primary)' }}>
-                  {token.symbol?.charAt(0) || 'T'}
+                  {token?.symbol?.charAt(0) || 'T'}
                 </span>
               )}
             </div>
@@ -481,21 +500,21 @@ const LiveTokenOverview = () => {
             <div className='flex-1 min-w-0'>
               <div className='flex items-center gap-2'>
                 <h2 className='text-2xl font-bold truncate' style={{ color: 'var(--mui-palette-text-primary)' }}>
-                  {token.name} {token.symbol && <span className='font-normal opacity-70'>({token.symbol})</span>}
+                  {token?.name} {token?.symbol && <span className='font-normal opacity-70'>({token?.symbol})</span>}
                 </h2>
               </div>
 
               <div className='flex flex-wrap items-center gap-2 mt-2'>
-                {token.mint_address && (
+                {token?.mint_address && (
                   <button
-                    onClick={() => copyToClipboard(token.mint_address)}
+                    onClick={() => copyToClipboard(token?.mint_address)}
                     className='flex items-center text-sm hover:opacity-80 transition-opacity px-2 py-1 rounded-lg'
                     style={{ backgroundColor: 'var(--mui-palette-background-default)' }}
                   >
                     <ExternalLink size={14} className='mr-1' style={{ color: 'var(--mui-palette-text-secondary)' }} />
                     <span style={{ color: 'var(--mui-palette-text-primary)' }}>
-                      {token.mint_address.substring(0, 6)}...
-                      {token.mint_address.substring(token.mint_address.length - 4)}
+                      {token?.mint_address.substring(0, 6)}...
+                      {token?.mint_address.substring(token?.mint_address.length - 4)}
                     </span>
                     <Copy size={12} className='ml-1' style={{ color: 'var(--mui-palette-text-secondary)' }} />
                   </button>
@@ -516,7 +535,7 @@ const LiveTokenOverview = () => {
                   </motion.div>
                 )}
 
-                {Object.entries(token.socials).map(
+                {Object.entries(token?.socials).map(
                   ([platform, url]) =>
                     url && (
                       <a
@@ -556,7 +575,7 @@ const LiveTokenOverview = () => {
             >
               <Clock size={16} style={{ color: 'var(--mui-palette-text-secondary)' }} />
               <span className='text-sm' style={{ color: 'var(--mui-palette-text-primary)' }}>
-                Created {getTimeSinceLaunch(token.created_at)}
+                Created {getTimeSinceLaunch(token?.created_at)}
               </span>
             </div>
           </div>
@@ -568,17 +587,14 @@ const LiveTokenOverview = () => {
           <SkeletonLoader height='h-6' width='w-32' />
         ) : (
           <>
-            <div
-              className='p-5 rounded-xl relative flex justify-between items-start'
-              style={{ backgroundColor: 'var(--mui-palette-background-default)' }}
-            >
-              <div className='w-full min-w-0'>
+            <div className='grid grid-cols-2 gap-4'>
+              <div className='p-5 rounded-xl' style={{ backgroundColor: 'var(--mui-palette-background-default)' }}>
                 <p className='text-sm lg:text-md mb-1' style={{ color: 'var(--mui-palette-text-secondary)' }}>
                   Current Price
                 </p>
                 <p
                   title={`$${Number(getCurrentPrice()).toFixed(15)}`}
-                  className='text-xl lg:text-3xl font-bold truncate md:overflow-visible md:whitespace-normal'
+                  className='text-xl lg:text-2xl font-bold truncate md:whitespace-normal'
                   style={{
                     color: 'var(--mui-palette-text-primary)',
                     textOverflow: 'ellipsis',
@@ -587,6 +603,20 @@ const LiveTokenOverview = () => {
                   }}
                 >
                   ${Number(getCurrentPrice()).toFixed(15)}
+                </p>
+              </div>
+
+              <div className='p-5 rounded-xl' style={{ backgroundColor: 'var(--mui-palette-background-default)' }}>
+                <p className='text-sm mb-1' style={{ color: 'var(--mui-palette-text-secondary)' }}>
+                  Profit
+                </p>
+                <p
+                  className='text-xl lg:text-2xl font-bold'
+                  style={{
+                    color: Number(getProfit()) >= 0 ? 'green' : 'red'
+                  }}
+                >
+                  {Number(getProfit()).toFixed(15)}
                 </p>
               </div>
             </div>
@@ -653,9 +683,7 @@ const LiveTokenOverview = () => {
         <iframe
           width='100%'
           height='600'
-          src={`https://birdeye.so/tv-widget/${token.mint_address}?chain=solana&viewMode=pair&chartInterval=5&chartType=CANDLE&chartLeftToolbar=show&theme=dark`}
-          frameborder='0'
-          allowfullscreen
+          src={`https://birdeye.so/tv-widget/${token?.mint_address}?chain=solana&viewMode=pair&chartInterval=5&chartType=CANDLE&chartLeftToolbar=show&theme=dark`}
         ></iframe>
       </div>
 
@@ -699,14 +727,14 @@ const LiveTokenOverview = () => {
         <div className='p-5 rounded-xl' style={{ backgroundColor: 'var(--mui-palette-background-default)' }}>
           <div className='flex justify-between items-center mb-4'>
             <h3 className='font-semibold text-lg' style={{ color: 'var(--mui-palette-text-primary)' }}>
-              About {token.name}
+              About {token?.name}
             </h3>
           </div>
           {loadingStates.tokenData ? (
             <SkeletonLoader height='h-6' width='w-32' />
           ) : (
             <p className='text-sm mb-4' style={{ color: 'var(--mui-palette-text-secondary)' }}>
-              {token.description}
+              {token?.description}
             </p>
           )}
         </div>
@@ -718,8 +746,18 @@ const LiveTokenOverview = () => {
             Active Trades
           </h3>
           <div className='flex items-center gap-2'>
+            <button
+              onClick={emergencyStop}
+              className='px-3 py-1 rounded-lg text-xs hover:opacity-80 transition-opacity'
+              style={{
+                backgroundColor: 'var(--mui-palette-error-light)',
+                color: 'black'
+              }}
+            >
+              sell everthing
+            </button>
             <span className='text-sm' style={{ color: 'var(--mui-palette-text-secondary)' }}>
-              {activeTrades.pagination.count} active
+              {activeTrades?.pagination.count} active
             </span>
           </div>
         </div>
@@ -747,24 +785,24 @@ const LiveTokenOverview = () => {
                   </td>
                 </tr>
               ) : (
-                activeTrades.data.map(trade => (
+                activeTrades?.data.map(trade => (
                   <tr
                     key={trade.created_at}
                     className='border-b hover:bg-black/5 dark:hover:bg-white/5 transition-colors'
                     style={{ borderColor: 'var(--mui-palette-divider)' }}
                   >
                     <td className='p-3 text-sm text-center' style={{ color: 'var(--mui-palette-text-secondary)' }}>
-                      {new Date(trade.created_at).toLocaleString()}
+                      {new Date(trade?.created_at).toLocaleString()}
                     </td>
                     <td className='p-3 text-sm text-center' style={{ color: 'var(--mui-palette-text-primary)' }}>
-                      {parseFloat(trade.open_price).toFixed(20)}
+                      {parseFloat(trade?.open_price).toFixed(20)}
                     </td>
                     <td className='p-3 text-sm text-center' style={{ color: 'var(--mui-palette-text-primary)' }}>
-                      {parseFloat(trade.total_sol).toFixed(20)}
+                      {parseFloat(trade?.total_sol).toFixed(20)}
                     </td>
                     <td className='p-3 text-sm text-center'>
                       <button
-                        onClick={() => cancelTrade(trade.wallet_address)}
+                        onClick={() => cancelTrade(trade?.wallet_address)}
                         className='px-3 py-1 rounded-lg text-xs hover:opacity-80 transition-opacity'
                         style={{
                           backgroundColor: 'var(--mui-palette-error-light)',
@@ -1004,14 +1042,14 @@ const LiveTokenOverview = () => {
               </tr>
             </thead>
             <tbody>
-              {loadingStates.tradeHistory ? (
+              {loadingStates?.tradeHistory ? (
                 <tr>
                   <td colSpan={4} className='py-10 text-center'>
                     <SkeletonLoader height='h-6' width='w-32' />
                   </td>
                 </tr>
               ) : (
-                tradeHistory.data.map(trade => (
+                tradeHistory?.data.map(trade => (
                   <tr
                     key={trade.created_at}
                     className='border-b hover:bg-black/5 dark:hover:bg-white/5 transition-colors'
@@ -1048,7 +1086,7 @@ const LiveTokenOverview = () => {
           <div className='flex items-center gap-2'>
             <span className='text-sm text-muted-foreground'>Trades per page:</span>
             <select
-              value={tradeHistory.pagination.pageSize}
+              value={tradeHistory?.pagination.pageSize}
               onChange={handleTradeHistoryPageSizeChange}
               className='text-sm border rounded px-2 py-1 bg-[var(--mui-palette-background-paper)]'
             >
@@ -1060,20 +1098,20 @@ const LiveTokenOverview = () => {
 
           <div className='flex items-center gap-2'>
             <button
-              onClick={() => handleTradeHistoryPageChange(tradeHistory.pagination.currentPage - 1)}
-              disabled={tradeHistory.pagination.currentPage === 1}
+              onClick={() => handleTradeHistoryPageChange(tradeHistory?.pagination.currentPage - 1)}
+              disabled={tradeHistory?.pagination.currentPage === 1}
               className='p-1 rounded-md border disabled:opacity-50 disabled:cursor-not-allowed'
             >
               <ChevronLeft size={18} />
             </button>
 
             <span className='text-sm text-muted-foreground'>
-              Page {tradeHistory.pagination.currentPage} of {tradeHistory.pagination.totalPages}
+              Page {tradeHistory?.pagination.currentPage} of {tradeHistory?.pagination.totalPages}
             </span>
 
             <button
-              onClick={() => handleTradeHistoryPageChange(tradeHistory.pagination.currentPage + 1)}
-              disabled={tradeHistory.pagination.currentPage === tradeHistory.pagination.totalPages}
+              onClick={() => handleTradeHistoryPageChange(tradeHistory?.pagination.currentPage + 1)}
+              disabled={tradeHistory?.pagination.currentPage === tradeHistory?.pagination.totalPages}
               className='p-1 rounded-md border disabled:opacity-50 disabled:cursor-not-allowed'
             >
               <ChevronRight size={18} />
@@ -1081,7 +1119,7 @@ const LiveTokenOverview = () => {
           </div>
         </div>
 
-        {tradeHistory.data.length === 0 && !loadingStates.tradeHistory && (
+        {tradeHistory?.data.length === 0 && !loadingStates?.tradeHistory && (
           <div className='py-8 text-center'>
             <p className='text-sm' style={{ color: 'var(--mui-palette-text-secondary)' }}>
               No trade history available
