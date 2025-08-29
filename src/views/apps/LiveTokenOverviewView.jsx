@@ -157,9 +157,28 @@ const LiveTokenOverview = () => {
         setIsWebSocketConnected(true)
       }
 
-      ws.current.onmessage = event => {
+      ws.current.onmessage = async event => {
         try {
           const newLog = JSON.parse(event.data)
+
+          if(newLog.stage ==='token created'){
+            try {
+              const response = await axiosInstance.get(`/token/${id}`);
+
+              if (response.data.success) {
+                const mint = response.data.data?.mint_address;
+
+                if (mint) {
+                  setToken(prev => ({
+                    ...prev,
+                    mint_address: mint
+                  }));
+                }
+              }
+            } catch (err) {
+              console.error("Error updating token mint_address:", err);
+            }
+          }
 
           if (newLog.info_tag === 'error') {
             toast.error(
@@ -687,6 +706,7 @@ const LiveTokenOverview = () => {
         </div>
 
         <iframe
+         key={token?.mint_address}
           width='100%'
           height='600'
           src={`https://birdeye.so/tv-widget/${token?.mint_address}?chain=solana&viewMode=pair&chartInterval=5&chartType=CANDLE&chartLeftToolbar=show&theme=dark`}
