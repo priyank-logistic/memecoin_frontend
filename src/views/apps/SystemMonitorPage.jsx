@@ -13,11 +13,9 @@ const SystemMonitorPage = () => {
   const [recentTrades, setRecentTrades] = useState([])
   const [tradesLoading, setTradesLoading] = useState(true)
   const [activeTokens, setActiveTokens] = useState(0)
+  const [systemUsage, setSystemUsage] = useState({ cpu: 0, ram: 0 , uptime: '00:00:00'})
 
   const [systemData, setSystemData] = useState({
-    cpu: 42,
-    ram: 67,
-    uptime: '23:45:12',
     logs: [
       { id: 1, level: 'error', message: 'RPC connection timeout', timestamp: '13:42:05' },
       { id: 2, level: 'warning', message: 'High latency detected', timestamp: '13:40:12' },
@@ -29,6 +27,15 @@ const SystemMonitorPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+
+        const systemResponse = await axiosInstance.get('bot-control/system-usage')
+
+        setSystemUsage({
+          cpu: systemResponse.data.cpu_usage_percentage,
+          ram: systemResponse.data.ram_usage_percentage,
+          uptime: systemResponse.data.uptime
+        })
+
         // Fetch session profit
         const profitResponse = await axiosInstance.get('token/total-profit')
 
@@ -44,7 +51,7 @@ const SystemMonitorPage = () => {
         setActiveTokens(activeTokensResponse.data.active_token_count)
       } catch (err) {
         console.error('Error fetching data:', err)
-        toast.error(err.response?.data?.message || 'Failed to fetch data', { autoClose: 3000 })
+        toast.error(err.response?.data?.error || err.response?.data?.message || 'Failed to fetch data', { autoClose: 3000 })
       } finally {
         setLoading(false)
         setTradesLoading(false)
@@ -156,12 +163,12 @@ const SystemMonitorPage = () => {
             <UsageGauge
               label='CPU Usage'
               style={{ color: 'var(--mui-palette-text-primary)' }}
-              value={systemData.cpu}
+              value={systemUsage.cpu}
               icon={<Cpu size={18} className='text-blue-400' />}
             />
             <UsageGauge
               label='RAM Usage'
-              value={systemData.ram}
+              value={systemUsage.ram}
               style={{ color: 'var(--mui-palette-text-primary)' }}
               icon={<Database size={18} className='text-purple-400' />}
             />
@@ -174,7 +181,7 @@ const SystemMonitorPage = () => {
           <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
             <StatusCard
               title='Uptime'
-              value={systemData.uptime}
+              value={systemUsage.uptime}
               icon={<Clock size={20} className='text-green-400' />}
             />
             <StatusCard
@@ -184,7 +191,7 @@ const SystemMonitorPage = () => {
             />
             <StatusCard
               title='Session Profit'
-              value={`${sessionProfit} SOL`}
+              value={`${Number(sessionProfit).toFixed(15)} SOL`}
               icon={<DollarSign size={20} className='text-green-400' />}
               text={sessionProfit >= 0 ? 'var(--mui-palette-success-main)' : 'var(--mui-palette-error-main)'}
             />
