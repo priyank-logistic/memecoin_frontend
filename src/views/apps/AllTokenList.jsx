@@ -53,7 +53,7 @@ const AllTokenList = () => {
 
         setDefaultTradeSettings(response.data)
       } catch (error) {
-        console.error('Error fetching default settings:', error)
+        // console.error('Error fetching default settings:', error)
         toast.error(error.response?.data?.message || 'Failed to fetch bot-control data', { autoClose: 3000 })
       } finally {
         setIsLoadingSettings(false)
@@ -71,7 +71,7 @@ const AllTokenList = () => {
 
         setSessionProfit(profitResponse.data.profit)
       } catch (err) {
-        console.error('Error fetching data:', err)
+        // console.error('Error fetching data:', err)
         toast.error(err.response?.data?.message || 'Failed to fetch Total Profit data', { autoClose: 3000 })
       } finally {
         setLoading(false)
@@ -88,7 +88,7 @@ const AllTokenList = () => {
 
         setMasterWallet(response.data)
       } catch (error) {
-        console.error('Error fetching master wallet:', error)
+        // console.error('Error fetching master wallet:', error)
         toast.error(error.response?.data?.message || 'Failed to fetch master wallet data', { autoClose: 3000 })
       }
     }
@@ -140,9 +140,9 @@ const AllTokenList = () => {
           is_approved: true,
           tweet_id: data.tweet_source,
           profit: data.profit || 0,
-          x:data.x,
+          x: data.x,
           telegram: data.telegram,
-          website: data.website,
+          website: data.website
 
           // wallet_count: '0',
           // amount_per_wallet: '0',
@@ -226,7 +226,7 @@ const AllTokenList = () => {
         setTokens(processedTokens)
         setTotalPages(response.data.total_pages)
       } catch (error) {
-        console.error('Error fetching tokens:', error)
+        // console.error('Error fetching tokens:', error)
         toast.error(error.response?.data?.message || 'Failed to fetch token data', { autoClose: 3000 })
 
         if (error.response?.status === 401) {
@@ -301,8 +301,8 @@ const AllTokenList = () => {
       setShowModal(false)
       setSelectedTokenId(null)
     } catch (error) {
-      console.error('Error approving token:', error)
-      toast.error(error.response?.data?.message || 'Failed to approve token')
+      // console.error('Error approving token:', error)
+      toast.error(error.response?.data?.error || error.response?.data?.message || 'Failed to approve token')
     }
   }
 
@@ -379,7 +379,7 @@ const AllTokenList = () => {
 
       setSelectedFile(null)
     } catch (error) {
-      console.error('Error creating token:', error)
+      // console.error('Error creating token:', error)
       toast.error(error.response || 'Error creating token', { autoClose: 3000 })
     } finally {
       setIsCreating(false)
