@@ -668,8 +668,19 @@ const AllTokenList = () => {
                   </label>
                   <input
                     type='number'
+                    min={0}
                     value={approvalValues.wallet_count}
-                    onChange={e => setApprovalValues({ ...approvalValues, wallet_count: e.target.value })}
+
+                    // onChange={e => setApprovalValues({ ...approvalValues, wallet_count: e.target.value })}
+                    onChange={e => {
+                      const value = e.target.value;
+
+                      if (value === "" || Number(value) >= 0) {
+                        setApprovalValues({ ...approvalValues, wallet_count: value });
+                      }else{
+                        setApprovalValues({ ...approvalValues, wallet_count: 0 });
+                      }
+                    }}
                     className='mt-1 block w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--mui-palette-background-paper)] text-[var(--mui-palette-text-primary)] focus:outline-none focus:ring-primary focus:border-primary'
                   />
                 </div>
@@ -679,8 +690,21 @@ const AllTokenList = () => {
                   </label>
                   <input
                     type='number'
+                    min={0}
                     value={approvalValues.amount_per_wallet}
-                    onChange={e => setApprovalValues({ ...approvalValues, amount_per_wallet: e.target.value })}
+
+                    // onChange={e => setApprovalValues({ ...approvalValues, amount_per_wallet: e.target.value })}
+                    onChange={e => {
+                      const value = e.target.value;
+
+                      if (value === "" || Number(value) >= 0) {
+                        setApprovalValues({ ...approvalValues, amount_per_wallet: value });
+                      }
+                      else{
+                        setApprovalValues({ ...approvalValues, amount_per_wallet: 0 });
+                      }
+                    }}
+                    
                     className='mt-1 block w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--mui-palette-background-paper)] text-[var(--mui-palette-text-primary)] focus:outline-none focus:ring-primary focus:border-primary'
                   />
                 </div>
@@ -815,8 +839,18 @@ const AllTokenList = () => {
                         </label>
                         <input
                           type='number'
+                          min={0}
                           value={newToken.wallet_count}
-                          onChange={e => setNewToken(prev => ({ ...prev, wallet_count: e.target.value }))}
+                          onChange={e => {
+                            const value = e.target.value;
+
+                            if (value === "" || Number(value) >= 0) {
+                              setNewToken(prev => ({ ...prev, wallet_count: value }));
+                            }else{
+                              setNewToken(prev => ({ ...prev, wallet_count: 0 }));
+                            }
+                          }}
+                          
                           className='mt-1 block w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--mui-palette-background-paper)]'
                         />
                       </div>
@@ -826,8 +860,19 @@ const AllTokenList = () => {
                         </label>
                         <input
                           type='number'
+                          min={0}
                           value={newToken.amount_per_wallet}
-                          onChange={e => setNewToken(prev => ({ ...prev, amount_per_wallet: e.target.value }))}
+                          onChange={e => {
+                            const value = e.target.value;
+
+                            if (value === "" || Number(value) >= 0) {
+                              setNewToken(prev => ({ ...prev, amount_per_wallet: value }));
+                            }else{
+                              setNewToken(prev => ({ ...prev, amount_per_wallet: 0 }));
+                            }
+                          }}
+                          
+
                           className='mt-1 block w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--mui-palette-background-paper)]'
                         />
                       </div>
